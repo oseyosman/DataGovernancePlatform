@@ -8,7 +8,7 @@
 
 ## Base URL
 
-http://localhost:5000
+http://localhost:5001
 ---
 
 ## Authentication
@@ -189,21 +189,21 @@ Get dashboard statistics.
 
 ### Register
 ```bash
-curl -X POST http://localhost:5000/api/auth/register \
+curl -X POST http://localhost:5001/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","email":"admin@example.com","password":"Admin123!","role":"admin"}'
 ```
 
 ### Login
 ```bash
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"Admin123!"}'
 ```
 
 ### Dashboard (with token)
 ```bash
-curl http://localhost:5000/api/dashboard/overview \
+curl http://localhost:5001/api/dashboard/overview \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
