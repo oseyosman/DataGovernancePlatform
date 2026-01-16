@@ -1,6 +1,6 @@
 """
 Models package initialization
 """
-from app.models.user import User
+from backend1.app.models.user import User
 
 __all__ = ['User']

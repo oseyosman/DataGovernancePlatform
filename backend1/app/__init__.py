@@ -1,12 +1,13 @@
 """
 Application factory and initialization
+Author: Osman Yildiz
 """
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from backproject.config import Config
+from backend1.config import Config
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -25,9 +26,9 @@ def create_app(config_class=Config):
     CORS(app)
     
     # Register blueprints
-    from app.routes import auth, dashboard
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(dashboard.bp)
+    from backend1.app.routes import auth_bp, dashboard_bp
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(dashboard_bp)
     
     # Health check route
     @app.route('/health')
