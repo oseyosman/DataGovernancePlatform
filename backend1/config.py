@@ -17,7 +17,7 @@ class Config:
     
     # Database settings
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://postgres:postgres@localhost:5432/data_governance_db'
+    'sqlite:///data_governance.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # JWT settings
