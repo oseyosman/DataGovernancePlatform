@@ -1,9 +1,6 @@
 # Data Governance & Compliance Platform
 
 **Author:** Osman Yildiz  
-**Institution:** Walsh College  
-**Program:** Master of Science in Information Technology  
-**Advisor:** Nanette S. Poulios
 
 ## Project Overview
 
@@ -66,11 +63,11 @@ Visit: http://localhost:5000/health
 
 ## Project Status
 
-- ✅ Phase 1: Planning (Weeks 1-4)
-- 🔄 Phase 2: Backend Development (Weeks 5-9)
-- ⏳ Phase 3: Frontend Development (Weeks 10-14)
-- ⏳ Phase 4: Integration & Testing (Weeks 15-18)
-- ⏳ Phase 5: Documentation & Demo (Weeks 19-22)
+- ✅ Phase 1: Planning (Weeks 1-2)
+- 🔄 Phase 2: Backend Development (Weeks 3-5)
+- ⏳ Phase 3: Frontend Development (Weeks 6-8)
+- ⏳ Phase 4: Integration & Testing (Weeks 7-9)
+- ⏳ Phase 5: Documentation & Demo (Weeks 10-11)
 
 ## Contact
 
