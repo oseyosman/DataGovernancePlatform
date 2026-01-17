@@ -22,23 +22,78 @@ def get_overview():
             return jsonify({'error': 'User not found'}), 404
         
         # Mock data for now - will be replaced with real data
+        # Mock data matching the new design
         overview_data = {
-            'total_assets': 1234,
-            'compliant_assets': 1100,
-            'non_compliant_assets': 134,
-            'compliance_score': 89.1,
-            'recent_activities': [
+            'metrics': {
+                'compliance': {'value': 87, 'change': 3, 'trend': 'up'},
+                'data_quality': {'value': 92, 'change': 2, 'trend': 'up'},
+                'active_alerts': {'value': 15, 'change': -5, 'trend': 'down', 'breakdown': {'high': 3, 'medium': 7, 'low': 5}},
+                'pending_reviews': {'value': 8, 'action_required': True}
+            },
+            'charts': {
+                'compliance_trend': {
+                    'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    'score': [82, 85, 84, 89, 87, 88],
+                    'alerts': [25, 20, 22, 18, 15, 12]
+                },
+                'iso_controls': {
+                    'implemented': 56,
+                    'in_progress': 31,
+                    'not_started': 13
+                }
+            },
+            'compliance_details': {
+                'iso_27001': [
+                    {'name': 'Access Control', 'score': 92, 'status': 'good'},
+                    {'name': 'Information Security', 'score': 88, 'status': 'good'},
+                    {'name': 'Operations Security', 'score': 75, 'status': 'warning'}
+                ],
+                'iso_27017': [
+                    {'name': 'Cloud Access Control', 'score': 90, 'status': 'good'},
+                    {'name': 'Virtual Network Security', 'score': 85, 'status': 'good'},
+                    {'name': 'Cloud Asset Management', 'score': 70, 'status': 'warning'}
+                ],
+                'policies': [
+                    {'name': 'Privacy Policy', 'completion': 95},
+                    {'name': 'Security Policy', 'completion': 88},
+                    {'name': 'Data Handling Policy', 'completion': 82}
+                ]
+            },
+            'recent_activity': [
                 {
                     'id': 1,
-                    'type': 'Data Classification',
-                    'description': 'Customer data classified as PII',
-                    'timestamp': '2024-01-15T10:30:00Z'
+                    'type': 'Access request approved',
+                    'timestamp': '5 hours ago',
+                    'status': 'success',
+                    'priority': 'low'
                 },
                 {
                     'id': 2,
-                    'type': 'Access Review',
-                    'description': 'Quarterly access review completed',
-                    'timestamp': '2024-01-14T15:45:00Z'
+                    'type': 'Compliance report generated',
+                    'timestamp': '6 hours ago',
+                    'status': 'success',
+                    'priority': 'low'
+                },
+                {
+                    'id': 3,
+                    'type': 'Unauthorized access attempt blocked',
+                    'timestamp': '8 hours ago',
+                    'status': 'danger',
+                    'priority': 'high'
+                },
+                {
+                    'id': 4,
+                    'type': 'Policy violation detected',
+                    'timestamp': '2 hours ago',
+                    'status': 'danger',
+                    'priority': 'high'
+                },
+                 {
+                    'id': 5,
+                    'type': 'Data quality scan completed',
+                    'timestamp': '3 hours ago',
+                    'status': 'success',
+                    'priority': 'low'
                 }
             ],
             'user': user.to_dict()
