@@ -13,7 +13,8 @@
 <body>
     <!-- Login Section -->
     <div id="auth-section" class="container login-container">
-        <div class="card">
+        <!-- Login Form -->
+        <div id="login-card" class="card">
             <h2>Sign In</h2>
             <div id="login-error" class="hidden" style="color: red; margin-bottom: 1rem;"></div>
             <form onsubmit="handleLogin(event)">
@@ -28,7 +29,42 @@
                 <button type="submit" class="btn-primary btn-full">Login to Platform</button>
             </form>
             <p style="text-align: center; color: #666; font-size: 0.875rem; margin-top: 1rem;">
-                Try: admin/admin123 or user/user123
+                Don't have an account? <button class="link-btn" onclick="toggleAuth('register')">Register here</button>
+            </p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-card" class="card hidden">
+            <h2>Create Account</h2>
+            <div id="register-error" class="hidden" style="color: red; margin-bottom: 1rem;"></div>
+            <div id="register-success" class="hidden" style="color: green; margin-bottom: 1rem;"></div>
+            <form onsubmit="handleRegister(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>First Name</label>
+                        <input type="text" id="reg-firstname" required>
+                    </div>
+                    <div>
+                        <label>Last Name</label>
+                        <input type="text" id="reg-lastname" required>
+                    </div>
+                </div>
+                <div>
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <div>
+                    <label>Username</label>
+                    <input type="text" id="reg-username" required>
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="password" id="reg-password" required>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Register</button>
+            </form>
+            <p style="text-align: center; color: #666; font-size: 0.875rem; margin-top: 1rem;">
+                Already have an account? <button class="link-btn" onclick="toggleAuth('login')">Login here</button>
             </p>
         </div>
     </div>
@@ -59,6 +95,7 @@
                 <button class="tab-btn" onclick="switchTab('compliance')">Compliance</button>
                 <button class="tab-btn" onclick="switchTab('data-quality')">Data Quality</button>
                 <button class="tab-btn" onclick="switchTab('access')">Access Control</button>
+                <button class="tab-btn" onclick="switchTab('documents')">Documents</button>
                 <button class="tab-btn" onclick="switchTab('summary')">Summarize</button>
             </div>
 
@@ -181,34 +218,177 @@
                             <div id="policy-list"></div>
                         </div>
                     </div>
+
+                    <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+                        <h4>Submitted Evidence & Documents</h4>
+                        <div id="submitted-docs-list"
+                            style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- TAB 3: DATA QUALITY (Placeholder) -->
-            <div id="tab-data-quality" class="tab-content hidden">
-                <div class="card" style="text-align: center; padding: 4rem;">
-                    <h3>Data Quality Dashboard</h3>
-                    <p>Metrics coming soon...</p>
-                </div>
-            </div>
-
-            <!-- TAB 4: ACCESS (Placeholder) -->
-            <div id="tab-access" class="tab-content hidden">
-                <div class="card" style="text-align: center; padding: 4rem;">
-                    <h3>Access Control Dashboard</h3>
-                    <p>Metrics coming soon...</p>
-                </div>
-            </div>
-
-            <!-- TAB 5: SUMMARY (Placeholder) -->
-            <div id="tab-summary" class="tab-content hidden">
-                <div class="card" style="text-align: center; padding: 4rem;">
-                    <h3>Executive Summary</h3>
-                    <p>Report generation coming soon...</p>
-                </div>
-            </div>
-
         </div>
+
+        <!-- TAB 3: DATA QUALITY -->
+        <div id="tab-data-quality" class="tab-content hidden">
+            <div class="card">
+                <h3>Data Quality Metrics</h3>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Comprehensive data quality assessment
+                </p>
+
+                <div style="height: 300px; margin-bottom: 2rem;">
+                    <canvas id="qualityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="metrics-grid" style="margin-top: 2rem; grid-template-columns: repeat(2, 1fr);">
+                <!-- Completeness -->
+                <div class="card">
+                    <div class="metric-header">Completeness</div>
+                    <div class="metric-value" style="color: #10b981;">95%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 95%; background: #10b981;"></div>
+                    </div>
+                </div>
+
+                <!-- Accuracy -->
+                <div class="card">
+                    <div class="metric-header">Accuracy</div>
+                    <div class="metric-value" style="color: #3b82f6;">90%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%; background: #3b82f6;"></div>
+                    </div>
+                </div>
+
+                <!-- Consistency -->
+                <div class="card">
+                    <div class="metric-header">Consistency</div>
+                    <div class="metric-value" style="color: #f59e0b;">88%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 88%; background: #f59e0b;"></div>
+                    </div>
+                </div>
+
+                <!-- Timeliness -->
+                <div class="card">
+                    <div class="metric-header">Timeliness</div>
+                    <div class="metric-value" style="color: #6366f1;">93%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 93%; background: #6366f1;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: ACCESS -->
+        <div id="tab-access" class="tab-content hidden">
+            <div class="card">
+                <h3>Access Control Management</h3>
+                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">User permissions and
+                    segregation of duties monitoring</p>
+
+                <div class="toolbar">
+                    <input type="text" class="search-input" placeholder="Search users...">
+                    <select class="filter-select">
+                        <option>All Users</option>
+                        <option>Compliance Officers</option>
+                        <option>Data Stewards</option>
+                        <option>Viewers</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>30 days</option>
+                        <option>7 days</option>
+                        <option>24 hours</option>
+                    </select>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Permissions</th>
+                            <th>Last Access</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="access-table-body">
+                        <!-- Dynamic Data -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: DOCUMENTS -->
+        <div id="tab-documents" class="tab-content hidden">
+            <div class="card">
+                <h3>Document Management</h3>
+                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 2rem;">Upload and review compliance
+                    documents</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                    <!-- Upload Section -->
+                    <div
+                        style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 1rem;">Upload New Document</h4>
+                        <form onsubmit="handleUpload(event)">
+                            <div style="margin-bottom: 1rem;">
+                                <label
+                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Document
+                                    Title</label>
+                                <input type="text" id="doc-title" required
+                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label
+                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Description</label>
+                                <textarea id="doc-desc" rows="3"
+                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;"></textarea>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label
+                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Type</label>
+                                <select id="doc-type"
+                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                                    <option value="policy">Policy Document</option>
+                                    <option value="audit">Audit Report</option>
+                                    <option value="evidence">Compliance Evidence</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label
+                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Document
+                                    File</label>
+                                <input type="file" id="doc-file"
+                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem; background: white;">
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%;">Upload Document</button>
+                        </form>
+                    </div>
+
+                    <!-- List Section -->
+                    <div>
+                        <h4 style="margin-bottom: 1rem;">Recent Documents</h4>
+                        <div id="document-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <!-- Dynamic List -->
+                            <p style="color: #6b7280;">Loading documents...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: SUMMARY (Placeholder) -->
+        <div id="tab-summary" class="tab-content hidden">
+            <div class="card" style="text-align: center; padding: 4rem;">
+                <h3>Executive Summary</h3>
+                <p>Report generation coming soon...</p>
+            </div>
+        </div>
+
+    </div>
     </div>
 
     <script>
@@ -263,6 +443,60 @@
             location.reload();
         }
 
+        async function handleRegister(e) {
+            e.preventDefault();
+            const firstname = document.getElementById('reg-firstname').value;
+            const lastname = document.getElementById('reg-lastname').value;
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password,
+                        first_name: firstname,
+                        last_name: lastname,
+                        role: 'user'
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('register-success').textContent = "Registration successful! You can now login.";
+                    document.getElementById('register-success').classList.remove('hidden');
+                    document.getElementById('register-error').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => toggleAuth('login'), 1500);
+                } else {
+                    document.getElementById('register-error').textContent = data.error;
+                    document.getElementById('register-error').classList.remove('hidden');
+                    document.getElementById('register-success').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('register-error').textContent = "Registration failed. Try again.";
+                document.getElementById('register-error').classList.remove('hidden');
+            }
+        }
+
+        function toggleAuth(view) {
+            if (view === 'register') {
+                document.getElementById('login-card').classList.add('hidden');
+                document.getElementById('register-card').classList.remove('hidden');
+            } else {
+                document.getElementById('register-card').classList.add('hidden');
+                document.getElementById('login-card').classList.remove('hidden');
+            }
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('register-error').classList.add('hidden');
+            document.getElementById('register-success').classList.add('hidden');
+        }
+
         function initDashboard(user) {
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
@@ -279,9 +513,151 @@
 
             // Show selected
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            // Highlight button (simple logic for now)
-            const index = ['overview', 'compliance', 'data-quality', 'access', 'summary'].indexOf(tabId);
-            document.querySelectorAll('.tab-btn')[index].classList.add('active');
+            // Highlight button
+            const index = ['overview', 'compliance', 'data-quality', 'access', 'documents', 'summary'].indexOf(tabId);
+            if (document.querySelectorAll('.tab-btn')[index]) {
+                document.querySelectorAll('.tab-btn')[index].classList.add('active');
+            }
+
+            if (tabId === 'documents') {
+                fetchDocuments();
+            } else if (tabId === 'compliance') {
+                fetchComplianceDocs();
+            }
+        }
+
+        async function fetchComplianceDocs() {
+            try {
+                const res = await fetch(`${API_URL}/reports/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                const container = document.getElementById('submitted-docs-list');
+                if (data.reports) {
+                    const submitted = data.reports.filter(r => r.status === 'submitted' || r.status === 'reviewed' || r.status === 'approved');
+
+                    if (submitted.length > 0) {
+                        container.innerHTML = submitted.map(doc => `
+                            <div class="card" style="padding: 1rem; border: 1px solid #e5e7eb;">
+                                <div style="font-weight: 600;">${doc.title}</div>
+                                <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">${doc.report_type}</div>
+                                <div style="margin-top: 0.5rem;">
+                                    <span class="badge badge-${doc.status === 'approved' ? 'success' : 'medium'}">${doc.status}</span>
+                                    ${doc.file_path ? `<a href="${API_URL.replace('/api', '')}/static/${doc.file_path}" target="_blank" style="font-size: 0.8rem; color: #2563eb; margin-left: 0.5rem;">View File</a>` : ''}
+                                </div>
+                                <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #f3f4f6; display: flex; gap: 0.5rem;">
+                                    <button onclick="updateReportStatus(${doc.id}, 'rejected')" class="btn-sm" style="background: #fee2e2; color: #dc2626; border: none; font-size: 0.75rem;">Reject</button>
+                                    <button onclick="deleteReport(${doc.id})" class="btn-sm" style="background: white; border: 1px solid #e5e7eb; color: #6b7280; font-size: 0.75rem;">Delete</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<p style="color: #666; font-style: italic;">No submitted documents yet.</p>';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+            const title = document.getElementById('doc-title').value;
+            const description = document.getElementById('doc-desc').value;
+            const type = document.getElementById('doc-type').value;
+            const fileInput = document.getElementById('doc-file');
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('report_type', type);
+            if (fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/reports/`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }, // No Content-Type header manually set for FormData
+                    body: formData
+                });
+
+                if (res.ok) {
+                    alert('Document uploaded successfully');
+                    e.target.reset();
+                    fetchDocuments();
+                } else {
+                    const data = await res.json();
+                    // JWT Extended uses 'msg', my API uses 'error'
+                    const errorMsg = data.error || data.msg || 'Unknown error';
+                    alert(`Upload Failed: ${res.status} ${res.statusText}\n${errorMsg}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert(`Network Error: ${err.message}`);
+            }
+        }
+
+        async function fetchDocuments() {
+            try {
+                const res = await fetch(`${API_URL}/reports/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                const container = document.getElementById('document-list');
+                if (data.reports && data.reports.length > 0) {
+                    container.innerHTML = data.reports.map(doc => `
+                        <div class="card" style="padding: 1rem; border: 1px solid #e5e7eb; box-shadow: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h5 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">${doc.title}</h5>
+                                    <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 0.5rem;">${doc.description || 'No description'}</p>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <span class="badge badge-low">${doc.report_type}</span>
+                                        <span class="badge badge-${doc.status === 'approved' ? 'success' : 'medium'}">${doc.status}</span>
+                                    </div>
+                                </div>
+                                ${doc.status === 'draft' ?
+                            `<button class="btn-sm btn-white" onclick="updateReportStatus(${doc.id}, 'submitted')">Submit</button>` :
+                            (doc.status === 'submitted' ? '<span style="color: #6b7280; font-size: 0.8rem;">Submitted</span>' : '')
+                        }
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="color: #6b7280; font-style: italic;">No documents found.</p>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+
+
+        async function updateReportStatus(id, newStatus) {
+            try {
+                const res = await fetch(`${API_URL}/reports/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    alert(`Document ${newStatus} successfully!`);
+                    fetchDocuments(); // Refresh list if on Documents tab
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Update failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error');
+            }
         }
 
         async function fetchDashboardData() {
@@ -310,6 +686,27 @@
                 renderComplianceList('iso27017-list', data.compliance_details.iso_27017);
                 renderPolicyList('policy-list', data.compliance_details.policies);
             }
+
+            // --- ACCESS CONTROL DATA ---
+            if (data.access_control) {
+                renderAccessTable(data.access_control);
+            }
+        }
+
+        function renderAccessTable(users) {
+            const tbody = document.getElementById('access-table-body');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td><div style="font-weight: 500;">${user.name}</div></td>
+                    <td>${user.role}</td>
+                    <td>${user.permissions}</td>
+                    <td>${user.last_access}</td>
+                    <td><span class="status-${user.status.toLowerCase()}">${user.status}</span></td>
+                    <td>
+                        <button class="btn-sm btn-white">${user.status === 'Pending' ? 'Review' : 'View'}</button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         function updateMetric(id, data) {
@@ -380,6 +777,34 @@
                 },
                 options: { maintainAspectRatio: false }
             });
+
+            // Data Quality Bar Chart
+            if (data.data_quality_details) {
+                const ctx3 = document.getElementById('qualityChart').getContext('2d');
+                new Chart(ctx3, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Completeness', 'Accuracy', 'Consistency', 'Timeliness'],
+                        datasets: [{
+                            label: 'Quality Score',
+                            data: [
+                                data.data_quality_details.completeness,
+                                data.data_quality_details.accuracy,
+                                data.data_quality_details.consistency,
+                                data.data_quality_details.timeliness
+                            ],
+                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#6366f1'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { x: { min: 0, max: 100 } }
+                    }
+                });
+            }
         }
 
         function renderActivity(items) {

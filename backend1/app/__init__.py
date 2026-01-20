@@ -23,7 +23,9 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    CORS(app)
+    jwt.init_app(app)
+    # Enable CORS for all domains on all routes
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     
     # Register blueprints
     from backend1.app.routes import auth_bp, dashboard_bp, admin_bp, reports_bp

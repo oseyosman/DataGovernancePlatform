@@ -22,7 +22,7 @@ def register():
         data = request.get_json()
         
         # Validate required fields
-        required_fields = ['username', 'email', 'password', 'role']
+        required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
@@ -38,7 +38,9 @@ def register():
         user = User(
             username=data['username'],
             email=data['email'],
-            role=data['role']
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            role=data.get('role', 'user')  # Default to user role if not specified
         )
         user.set_password(data['password'])
         
@@ -72,8 +74,9 @@ def login():
             return jsonify({'error': 'Invalid username or password'}), 401
         
         # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # Identity must be a string for flask-jwt-extended
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'Login successful',
@@ -91,7 +94,7 @@ def login():
 def get_current_user():
     """Get current user information"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user:
@@ -109,7 +112,7 @@ def refresh():
     """Refresh access token"""
     try:
         user_id = get_jwt_identity()
-        access_token = create_access_token(identity=user_id)
+        access_token = create_access_token(identity=str(user_id))
         
         return jsonify({
             'access_token': access_token

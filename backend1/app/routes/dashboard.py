@@ -10,6 +10,7 @@ from backend1.app.models.user import User
 bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
 
 
+
 @bp.route('/overview', methods=['GET'])
 @jwt_required()
 def get_overview():
@@ -59,6 +60,12 @@ def get_overview():
                     {'name': 'Data Handling Policy', 'completion': 82}
                 ]
             },
+            'data_quality_details': {
+                'completeness': 95,
+                'accuracy': 90,
+                'consistency': 88,
+                'timeliness': 93
+            },
             'recent_activity': [
                 {
                     'id': 1,
@@ -95,6 +102,11 @@ def get_overview():
                     'status': 'success',
                     'priority': 'low'
                 }
+            ],
+            'access_control': [
+                {'name': 'John Smith', 'role': 'Compliance Officer', 'permissions': 'Read, Write, Approve', 'last_access': '2 hours ago', 'status': 'Active'},
+                {'name': 'Sarah Johnson', 'role': 'Data Steward', 'permissions': 'Read, Write', 'last_access': '5 hours ago', 'status': 'Active'},
+                {'name': 'Mike Davis', 'role': 'Viewer', 'permissions': 'Read', 'last_access': '1 day ago', 'status': 'Pending'}
             ],
             'user': user.to_dict()
         }

@@ -7,7 +7,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from backend1.app import db
 from backend1.app.models.user import User
+from backend1.app.models.user import User
 from backend1.app.models.report import Report
+import os
+from werkzeug.utils import secure_filename
+from flask import current_app
 
 bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 
@@ -73,14 +77,34 @@ def get_report(report_id):
 def create_report():
     """Create a new report"""
     try:
-        user_id = get_jwt_identity()
-        data = request.get_json()
+        user_id = int(get_jwt_identity())
+        # user_id = 1 # HARDCODED FOR DEBUGGING
         
+        # Handle form data (multipart/form-data)
+        if 'title' not in request.form or 'report_type' not in request.form:
+             # Fallback to JSON if no form data (backward compatibility)
+            data = request.get_json() if request.is_json else request.form
+        else:
+            data = request.form
+
         # Validate required fields
-        required_fields = ['title', 'report_type']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+        if not data.get('title') or not data.get('report_type'):
+            return jsonify({'error': 'Missing required fields: title, report_type'}), 400
+            
+        file_path = None
+        if 'file' in request.files:
+            file = request.files['file']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+                os.makedirs(upload_folder, exist_ok=True)
+                
+                # Save file
+                file_path = os.path.join(upload_folder, filename)
+                file.save(file_path)
+                
+                # Store relative path for serving
+                file_path = f'uploads/{filename}'
         
         # Create new report
         report = Report(
@@ -89,7 +113,8 @@ def create_report():
             report_type=data['report_type'],
             status=data.get('status', 'draft'),
             priority=data.get('priority', 'medium'),
-            created_by=user_id
+            created_by=user_id,
+            file_path=file_path
         )
         
         db.session.add(report)

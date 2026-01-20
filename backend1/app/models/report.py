@@ -16,6 +16,7 @@ class Report(db.Model):
     report_type = db.Column(db.String(50), nullable=False)  # compliance, audit, risk, etc.
     status = db.Column(db.String(20), nullable=False, default='draft')  # draft, submitted, reviewed, approved
     priority = db.Column(db.String(20), nullable=False, default='medium')  # low, medium, high, critical
+    file_path = db.Column(db.String(255), nullable=True)  # Path to uploaded file
     
     # Relationships
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -42,6 +43,7 @@ class Report(db.Model):
             'report_type': self.report_type,
             'status': self.status,
             'priority': self.priority,
+            'file_path': self.file_path,
             'created_by': self.created_by,
             'reviewed_by': self.reviewed_by,
             'created_at': self.created_at.isoformat() if self.created_at else None,
