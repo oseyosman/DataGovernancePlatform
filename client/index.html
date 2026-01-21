@@ -93,6 +93,7 @@
             <div class="tabs-container">
                 <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
                 <button class="tab-btn" onclick="switchTab('compliance')">Compliance</button>
+                <button class="tab-btn" onclick="switchTab('companies')">Companies</button>
                 <button class="tab-btn" onclick="switchTab('data-quality')">Data Quality</button>
                 <button class="tab-btn" onclick="switchTab('access')">Access Control</button>
                 <button class="tab-btn" onclick="switchTab('documents')">Documents</button>
@@ -228,171 +229,184 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- TAB 3: DATA QUALITY -->
-        <div id="tab-data-quality" class="tab-content hidden">
-            <div class="card">
-                <h3>Data Quality Metrics</h3>
-                <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Comprehensive data quality assessment
-                </p>
+            <!-- TAB: COMPANIES (Real Data from AnnualReports.com) -->
+            <div id="tab-companies" class="tab-content hidden">
+                <div class="card">
+                    <h3>Company Data from AnnualReports.com</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Real annual reports and company
+                        information for compliance analysis</p>
 
-                <div style="height: 300px; margin-bottom: 2rem;">
-                    <canvas id="qualityChart"></canvas>
+                    <div id="companies-list" style="display: grid; gap: 1.5rem;">
+                        <p style="color: #666;">Loading companies...</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="metrics-grid" style="margin-top: 2rem; grid-template-columns: repeat(2, 1fr);">
-                <!-- Completeness -->
+            <!-- TAB 3: DATA QUALITY -->
+            <div id="tab-data-quality" class="tab-content hidden">
                 <div class="card">
-                    <div class="metric-header">Completeness</div>
-                    <div class="metric-value" style="color: #10b981;">95%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 95%; background: #10b981;"></div>
+                    <h3>Data Quality Metrics</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Comprehensive data quality
+                        assessment
+                    </p>
+
+                    <div style="height: 300px; margin-bottom: 2rem;">
+                        <canvas id="qualityChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Accuracy -->
-                <div class="card">
-                    <div class="metric-header">Accuracy</div>
-                    <div class="metric-value" style="color: #3b82f6;">90%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 90%; background: #3b82f6;"></div>
-                    </div>
-                </div>
-
-                <!-- Consistency -->
-                <div class="card">
-                    <div class="metric-header">Consistency</div>
-                    <div class="metric-value" style="color: #f59e0b;">88%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 88%; background: #f59e0b;"></div>
-                    </div>
-                </div>
-
-                <!-- Timeliness -->
-                <div class="card">
-                    <div class="metric-header">Timeliness</div>
-                    <div class="metric-value" style="color: #6366f1;">93%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 93%; background: #6366f1;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 4: ACCESS -->
-        <div id="tab-access" class="tab-content hidden">
-            <div class="card">
-                <h3>Access Control Management</h3>
-                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">User permissions and
-                    segregation of duties monitoring</p>
-
-                <div class="toolbar">
-                    <input type="text" class="search-input" placeholder="Search users...">
-                    <select class="filter-select">
-                        <option>All Users</option>
-                        <option>Compliance Officers</option>
-                        <option>Data Stewards</option>
-                        <option>Viewers</option>
-                    </select>
-                    <select class="filter-select">
-                        <option>30 days</option>
-                        <option>7 days</option>
-                        <option>24 hours</option>
-                    </select>
-                </div>
-
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Role</th>
-                            <th>Permissions</th>
-                            <th>Last Access</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="access-table-body">
-                        <!-- Dynamic Data -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: DOCUMENTS -->
-        <div id="tab-documents" class="tab-content hidden">
-            <div class="card">
-                <h3>Document Management</h3>
-                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 2rem;">Upload and review compliance
-                    documents</p>
-
-                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
-                    <!-- Upload Section -->
-                    <div
-                        style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
-                        <h4 style="margin-bottom: 1rem;">Upload New Document</h4>
-                        <form onsubmit="handleUpload(event)">
-                            <div style="margin-bottom: 1rem;">
-                                <label
-                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Document
-                                    Title</label>
-                                <input type="text" id="doc-title" required
-                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label
-                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Description</label>
-                                <textarea id="doc-desc" rows="3"
-                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;"></textarea>
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label
-                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Type</label>
-                                <select id="doc-type"
-                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
-                                    <option value="policy">Policy Document</option>
-                                    <option value="audit">Audit Report</option>
-                                    <option value="evidence">Compliance Evidence</option>
-                                </select>
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label
-                                    style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Document
-                                    File</label>
-                                <input type="file" id="doc-file"
-                                    style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem; background: white;">
-                            </div>
-                            <button type="submit" class="btn-primary" style="width: 100%;">Upload Document</button>
-                        </form>
+                <div class="metrics-grid" style="margin-top: 2rem; grid-template-columns: repeat(2, 1fr);">
+                    <!-- Completeness -->
+                    <div class="card">
+                        <div class="metric-header">Completeness</div>
+                        <div class="metric-value" style="color: #10b981;">95%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%; background: #10b981;"></div>
+                        </div>
                     </div>
 
-                    <!-- List Section -->
-                    <div>
-                        <h4 style="margin-bottom: 1rem;">Recent Documents</h4>
-                        <div id="document-list" style="display: flex; flex-direction: column; gap: 1rem;">
-                            <!-- Dynamic List -->
-                            <p style="color: #6b7280;">Loading documents...</p>
+                    <!-- Accuracy -->
+                    <div class="card">
+                        <div class="metric-header">Accuracy</div>
+                        <div class="metric-value" style="color: #3b82f6;">90%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 90%; background: #3b82f6;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Consistency -->
+                    <div class="card">
+                        <div class="metric-header">Consistency</div>
+                        <div class="metric-value" style="color: #f59e0b;">88%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 88%; background: #f59e0b;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Timeliness -->
+                    <div class="card">
+                        <div class="metric-header">Timeliness</div>
+                        <div class="metric-value" style="color: #6366f1;">93%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 93%; background: #6366f1;"></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- TAB 5: SUMMARY (Placeholder) -->
-        <div id="tab-summary" class="tab-content hidden">
-            <div class="card" style="text-align: center; padding: 4rem;">
-                <h3>Executive Summary</h3>
-                <p>Report generation coming soon...</p>
+            <!-- TAB 4: ACCESS -->
+            <div id="tab-access" class="tab-content hidden">
+                <div class="card">
+                    <h3>Access Control Management</h3>
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">User permissions and
+                        segregation of duties monitoring</p>
+
+                    <div class="toolbar">
+                        <input type="text" class="search-input" placeholder="Search users...">
+                        <select class="filter-select">
+                            <option>All Users</option>
+                            <option>Compliance Officers</option>
+                            <option>Data Stewards</option>
+                            <option>Viewers</option>
+                        </select>
+                        <select class="filter-select">
+                            <option>30 days</option>
+                            <option>7 days</option>
+                            <option>24 hours</option>
+                        </select>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Permissions</th>
+                                <th>Last Access</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="access-table-body">
+                            <!-- Dynamic Data -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-    </div>
+            <!-- TAB: DOCUMENTS -->
+            <div id="tab-documents" class="tab-content hidden">
+                <div class="card">
+                    <h3>Document Management</h3>
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 2rem;">Upload and review compliance
+                        documents</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                        <!-- Upload Section -->
+                        <div
+                            style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+                            <h4 style="margin-bottom: 1rem;">Upload New Document</h4>
+                            <form onsubmit="handleUpload(event)">
+                                <div style="margin-bottom: 1rem;">
+                                    <label
+                                        style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Document
+                                        Title</label>
+                                    <input type="text" id="doc-title" required
+                                        style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label
+                                        style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Description</label>
+                                    <textarea id="doc-desc" rows="3"
+                                        style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;"></textarea>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label
+                                        style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Type</label>
+                                    <select id="doc-type"
+                                        style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                                        <option value="policy">Policy Document</option>
+                                        <option value="audit">Audit Report</option>
+                                        <option value="evidence">Compliance Evidence</option>
+                                    </select>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label
+                                        style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Document
+                                        File</label>
+                                    <input type="file" id="doc-file"
+                                        style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem; background: white;">
+                                </div>
+                                <button type="submit" class="btn-primary" style="width: 100%;">Upload Document</button>
+                            </form>
+                        </div>
+
+                        <!-- List Section -->
+                        <div>
+                            <h4 style="margin-bottom: 1rem;">Recent Documents</h4>
+                            <div id="document-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Dynamic List -->
+                                <p style="color: #6b7280;">Loading documents...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: SUMMARY (Placeholder) -->
+            <div id="tab-summary" class="tab-content hidden">
+                <div class="card" style="text-align: center; padding: 4rem;">
+                    <h3>Executive Summary</h3>
+                    <p>Report generation coming soon...</p>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5001/api';
+        const API_URL = 'http://localhost:5000/api';
         let token = localStorage.getItem('token');
         let charts = {};
 
@@ -514,7 +528,7 @@
             // Show selected
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             // Highlight button
-            const index = ['overview', 'compliance', 'data-quality', 'access', 'documents', 'summary'].indexOf(tabId);
+            const index = ['overview', 'compliance', 'companies', 'data-quality', 'access', 'documents', 'summary'].indexOf(tabId);
             if (document.querySelectorAll('.tab-btn')[index]) {
                 document.querySelectorAll('.tab-btn')[index].classList.add('active');
             }
@@ -523,6 +537,8 @@
                 fetchDocuments();
             } else if (tabId === 'compliance') {
                 fetchComplianceDocs();
+            } else if (tabId === 'companies') {
+                fetchCompanies();
             }
         }
 
@@ -635,6 +651,113 @@
         }
 
 
+        async function fetchCompanies() {
+            try {
+                const res = await fetch(`${API_URL}/companies`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                const container = document.getElementById('companies-list');
+                if (data.companies && data.companies.length > 0) {
+                    container.innerHTML = data.companies.map(company => `
+                        <div class="card" style="padding: 1.5rem; border: 2px solid #e5e7eb;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                <div>
+                                    <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
+                                        ${company.name}
+                                    </h4>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                        ${company.ticker ? `<span class="badge badge-success">${company.ticker}</span>` : ''}
+                                        ${company.exchange ? `<span class="badge badge-low">${company.exchange}</span>` : ''}
+                                        ${company.industry ? `<span class="badge badge-medium">${company.industry}</span>` : ''}
+                                    </div>
+                                </div>
+                                ${company.website ? `
+                                    <a href="${company.website}" target="_blank" class="btn-sm btn-white">
+                                        Visit Website
+                                    </a>
+                                ` : ''}
+                            </div>
+                            
+                            ${company.description ? `
+                                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">
+                                    ${company.description.substring(0, 200)}${company.description.length > 200 ? '...' : ''}
+                                </p>
+                            ` : ''}
+                            
+                            <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem; margin-top: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                    <h5 style="font-weight: 600; font-size: 0.95rem;">Annual Reports</h5>
+                                    <span class="badge badge-success" id="company-${company.id}-count">Loading...</span>
+                                </div>
+                                <div id="company-${company.id}-reports" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem;">
+                                    <span style="color: #9ca3af; font-size: 0.875rem;">Loading reports...</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Fetch reports for each company
+                    data.companies.forEach(company => fetchCompanyReports(company.id));
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+                            <p style="font-size: 1.1rem; margin-bottom: 1rem;">No companies found in database</p>
+                            <p style="font-size: 0.9rem;">Run <code>population_companies.py</code> to scrape data from AnnualReports.com</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('companies-list').innerHTML = `
+                    <p style="color: #ef4444;">Error loading companies: ${err.message}</p>
+                `;
+            }
+        }
+
+        async function fetchCompanyReports(companyId) {
+            try {
+                const res = await fetch(`${API_URL}/companies/${companyId}/reports`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                const container = document.getElementById(`company-${companyId}-reports`);
+                const countBadge = document.getElementById(`company-${companyId}-count`);
+
+                if (data.reports && data.reports.length > 0) {
+                    countBadge.textContent = `${data.reports.length} Reports`;
+
+                    // Show only recent 10 reports
+                    const recentReports = data.reports.slice(0, 10);
+                    container.innerHTML = recentReports.map(report => `
+                        <div style="background: #f9fafb; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #e5e7eb;">
+                            <div style="font-weight: 600; font-size: 0.85rem;">${report.year}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">${report.report_type || 'Annual Report'}</div>
+                            ${report.pdf_url ? `
+                                <a href="${report.pdf_url}" target="_blank" style="font-size: 0.75rem; color: #2563eb; display: inline-block; margin-top: 0.25rem;">
+                                    View PDF
+                                </a>
+                            ` : ''}
+                        </div>
+                    `).join('');
+
+                    if (data.reports.length > 10) {
+                        container.innerHTML += `
+                            <div style="grid-column: 1 / -1; text-align: center; color: #6b7280; font-size: 0.85rem; padding: 0.5rem;">
+                                + ${data.reports.length - 10} more reports
+                            </div>
+                        `;
+                    }
+                } else {
+                    countBadge.textContent = '0 Reports';
+                    container.innerHTML = '<span style="color: #9ca3af; font-size: 0.875rem;">No reports available</span>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
 
         async function updateReportStatus(id, newStatus) {
             try {
