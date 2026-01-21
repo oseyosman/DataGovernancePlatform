@@ -16,7 +16,10 @@ jwt = JWTManager()
 
 def create_app(config_class=Config):
     """Create and configure Flask application"""
-    app = Flask(__name__)
+    import os
+    # Configure static folder to serve client files
+    client_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'client')
+    app = Flask(__name__, static_folder=client_dir, static_url_path='')
     app.config.from_object(config_class)
     
     # Initialize extensions with app
@@ -46,9 +49,9 @@ def create_app(config_class=Config):
             'author': 'Osman Yildiz'
         }, 200
     
-    # Welcome route
-    @app.route('/')
-    def index():
+    # API info endpoint
+    @app.route('/api')
+    def api_info():
         return {
             'project': 'Data Governance & Compliance Platform',
             'author': 'Osman Yildiz',
@@ -63,5 +66,11 @@ def create_app(config_class=Config):
                 'companies': '/api/companies'
             }
         }, 200
+    
+    # Serve client application
+    @app.route('/')
+    def index():
+        from flask import send_from_directory
+        return send_from_directory(app.static_folder, 'index.html')
     
     return app
