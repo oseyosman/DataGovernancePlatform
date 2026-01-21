@@ -29,10 +29,12 @@ def create_app(config_class=Config):
     
     # Register blueprints
     from backend1.app.routes import auth_bp, dashboard_bp, admin_bp, reports_bp
+    from backend1.app.routes.companies import bp as companies_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(companies_bp)
     
     # Health check route
     @app.route('/health')
@@ -57,7 +59,8 @@ def create_app(config_class=Config):
                 'login': '/api/auth/login',
                 'dashboard': '/api/dashboard/overview',
                 'admin': '/api/admin/users',
-                'reports': '/api/reports'
+                'reports': '/api/reports',
+                'companies': '/api/companies'
             }
         }, 200
     
