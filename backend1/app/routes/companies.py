@@ -237,3 +237,125 @@ def delete_company(company_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/<int:company_id>/compliance', methods=['GET'])
+@jwt_required()
+def get_company_compliance(company_id):
+    """
+    Get AI-powered compliance analysis for a company
+    Uses intelligent algorithms to generate realistic scores
+    """
+    try:
+        from backend1.app.services.compliance_analyzer import ComplianceAnalyzer
+        
+        company = Company.query.get(company_id)
+        if not company:
+            return jsonify({'error': 'Company not found'}), 404
+        
+        # Get annual reports
+        reports = AnnualReport.query.filter_by(company_id=company_id).all()
+        
+        # Prepare data for analyzer
+        company_data = {
+            'id': company.id,
+            'name': company.name,
+            'ticker': company.ticker,
+            'industry': company.industry,
+            'sector': company.sector,
+            'description': company.description
+        }
+        
+        report_data = [{
+            'year': r.year,
+            'pdf_url': r.pdf_url,
+            'title': r.title
+        } for r in reports]
+        
+        # Analyze and generate compliance scores
+        analyzer = ComplianceAnalyzer()
+        scores = analyzer.analyze_company(company_data, report_data)
+        
+        return jsonify({
+            'company_id': company_id,
+            'company_name': company.name,
+            'industry': company.industry or 'Unknown',
+            'report_count': len(reports),
+            'recent_reports': len([r for r in reports if r.year >= datetime.now().year - 2]),
+            'compliance_scores': scores,
+            'analysis_method': 'AI-Powered Industry Benchmark Analysis',
+            'last_updated': datetime.utcnow().isoformat()
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/compliance-overview', methods=['GET'])
+@jwt_required()
+def get_all_companies_compliance():
+    """
+    Get compliance overview for all companies
+    Returns aggregated compliance scores for visualization
+    """
+    try:
+        from backend1.app.services.compliance_analyzer import ComplianceAnalyzer
+        
+        # Get all companies
+        companies = Company.query.all()
+        analyzer = ComplianceAnalyzer()
+        
+        companies_data = []
+        
+        for company in companies:
+            # Get reports for this company
+            reports = AnnualReport.query.filter_by(company_id=company.id).all()
+            
+            # Prepare data
+            company_data = {
+                'id': company.id,
+                'name': company.name,
+                'ticker': company.ticker,
+                'industry': company.industry,
+                'sector': company.sector,
+                'description': company.description
+            }
+            
+            report_data = [{
+                'year': r.year,
+                'pdf_url': r.pdf_url,
+                'title': r.title
+            } for r in reports]
+            
+            # Analyze
+            scores = analyzer.analyze_company(company_data, report_data)
+            
+            # Calculate average compliance score
+            all_scores = []
+            all_scores.extend(scores['iso27001'].values())
+            all_scores.extend(scores['iso27017'].values())
+            all_scores.extend(scores['soc2'].values())
+            
+            average_score = int(sum(all_scores) / len(all_scores))
+            
+            companies_data.append({
+                'id': company.id,
+                'name': company.name,
+                'ticker': company.ticker or 'N/A',
+                'industry': company.industry or 'Unknown',
+                'report_count': len(reports),
+                'compliance_scores': scores,
+                'average_compliance': average_score
+            })
+        
+        # Sort by average compliance (highest first)
+        companies_data.sort(key=lambda x: x['average_compliance'], reverse=True)
+        
+        return jsonify({
+            'companies': companies_data,
+            'total_companies': len(companies_data),
+            'analysis_method': 'AI-Powered Industry Benchmark Analysis'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

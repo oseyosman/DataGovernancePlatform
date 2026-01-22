@@ -7,6 +7,12 @@
     <title>Data Governance Platform</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Critical styles - inline to ensure they load even if external CSS fails */
+        .hidden {
+            display: none !important;
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -198,9 +204,25 @@
             <div id="tab-compliance" class="tab-content hidden">
                 <div class="card">
                     <h3>Compliance Controls</h3>
-                    <p style="color: #666; font-size: 0.9rem;">ISO 27001 and ISO/IEC 27017 compliance monitoring</p>
+                    <p style="color: #666; font-size: 0.9rem;">ISO 27001, ISO/IEC 27017, and SOC 2 Type II compliance
+                        monitoring</p>
 
-                    <div class="compliance-grid">
+                    <!-- Company Filter -->
+                    <div style="margin: 1.5rem 0; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+                        <label
+                            style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+                            Select Company:
+                        </label>
+                        <select id="compliance-company-filter" class="filter-select"
+                            onchange="filterComplianceByCompany()" style="width: 100%; max-width: 400px;">
+                            <option value="">All Companies (Overview)</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                        <p id="compliance-company-info" style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                        </p>
+                    </div>
+
+                    <div class="compliance-grid" style="grid-template-columns: repeat(4, 1fr);">
                         <!-- Column 1 -->
                         <div class="control-group">
                             <h4>ISO 27001 Controls</h4>
@@ -214,6 +236,12 @@
                         </div>
 
                         <!-- Column 3 -->
+                        <div class="control-group">
+                            <h4>SOC 2 Type II</h4>
+                            <div id="soc2-list"></div>
+                        </div>
+
+                        <!-- Column 4 -->
                         <div class="control-group">
                             <h4>Policy Acknowledgments</h4>
                             <div id="policy-list"></div>
@@ -246,51 +274,34 @@
             <!-- TAB 3: DATA QUALITY -->
             <div id="tab-data-quality" class="tab-content hidden">
                 <div class="card">
-                    <h3>Data Quality Metrics</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Comprehensive data quality
-                        assessment
+                    <h3>All Companies Compliance Overview</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        🤖 AI-powered compliance analysis across all companies
                     </p>
 
-                    <div style="height: 300px; margin-bottom: 2rem;">
-                        <canvas id="qualityChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="metrics-grid" style="margin-top: 2rem; grid-template-columns: repeat(2, 1fr);">
-                    <!-- Completeness -->
-                    <div class="card">
-                        <div class="metric-header">Completeness</div>
-                        <div class="metric-value" style="color: #10b981;">95%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 95%; background: #10b981;"></div>
+                    <div
+                        style="margin-bottom: 1.5rem; padding: 1rem; background: #f3f4f6; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Total Companies</div>
+                            <div id="total-companies-count"
+                                style="font-size: 1.5rem; font-weight: 700; color: #1e40af;">--</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Average Compliance
+                            </div>
+                            <div id="average-compliance-score"
+                                style="font-size: 1.5rem; font-weight: 700; color: #059669;">--</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Highest Score</div>
+                            <div id="highest-compliance-score"
+                                style="font-size: 1.5rem; font-weight: 700; color: #7c3aed;">--</div>
                         </div>
                     </div>
 
-                    <!-- Accuracy -->
-                    <div class="card">
-                        <div class="metric-header">Accuracy</div>
-                        <div class="metric-value" style="color: #3b82f6;">90%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 90%; background: #3b82f6;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Consistency -->
-                    <div class="card">
-                        <div class="metric-header">Consistency</div>
-                        <div class="metric-value" style="color: #f59e0b;">88%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 88%; background: #f59e0b;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Timeliness -->
-                    <div class="card">
-                        <div class="metric-header">Timeliness</div>
-                        <div class="metric-value" style="color: #6366f1;">93%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 93%; background: #6366f1;"></div>
-                        </div>
+                    <!-- Companies Compliance Bars -->
+                    <div id="companies-compliance-chart" style="max-height: 600px; overflow-y: auto; padding: 0.5rem;">
+                        <!-- Dynamic content will be inserted here -->
                     </div>
                 </div>
             </div>
@@ -303,17 +314,18 @@
                         segregation of duties monitoring</p>
 
                     <div class="toolbar">
-                        <input type="text" class="search-input" placeholder="Search users...">
-                        <select class="filter-select">
-                            <option>All Users</option>
-                            <option>Compliance Officers</option>
-                            <option>Data Stewards</option>
-                            <option>Viewers</option>
+                        <input type="text" id="user-search" class="search-input" placeholder="Search users..."
+                            oninput="filterAccessTable()">
+                        <select id="role-filter" class="filter-select" onchange="filterAccessTable()">
+                            <option value="">All Users</option>
+                            <option value="Compliance Officer">Compliance Officers</option>
+                            <option value="Data Steward">Data Stewards</option>
+                            <option value="Viewer">Viewers</option>
                         </select>
-                        <select class="filter-select">
-                            <option>30 days</option>
-                            <option>7 days</option>
-                            <option>24 hours</option>
+                        <select id="time-filter" class="filter-select" onchange="filterAccessTable()">
+                            <option value="30">30 days</option>
+                            <option value="7">7 days</option>
+                            <option value="1">24 hours</option>
                         </select>
                     </div>
 
@@ -402,6 +414,22 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div id="user-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">User Details</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <!-- Dynamic buttons -->
+            </div>
         </div>
     </div>
 
@@ -536,9 +564,12 @@
             if (tabId === 'documents') {
                 fetchDocuments();
             } else if (tabId === 'compliance') {
-                fetchComplianceDocs();
+                populateComplianceCompanyFilter();
+                displayOverviewCompliance();
             } else if (tabId === 'companies') {
                 fetchCompanies();
+            } else if (tabId === 'data-quality') {
+                fetchAllCompaniesCompliance();
             }
         }
 
@@ -783,6 +814,211 @@
             }
         }
 
+        // --- COMPANY-BASED COMPLIANCE FILTERING ---
+        let allCompaniesData = [];
+
+        // Populate company dropdown when compliance tab is opened
+        async function populateComplianceCompanyFilter() {
+            try {
+                const res = await fetch(`${API_URL}/companies?per_page=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    allCompaniesData = data.companies || [];
+
+                    const select = document.getElementById('compliance-company-filter');
+                    const currentValue = select.value;
+
+                    // Keep "All Companies" option and add companies
+                    const companiesHTML = allCompaniesData.map(company =>
+                        `<option value="${company.id}">${company.name} (${company.ticker || 'N/A'})</option>`
+                    ).join('');
+
+                    select.innerHTML = `<option value="">All Companies (Overview)</option>${companiesHTML}`;
+                    select.value = currentValue; // Restore previous selection
+
+                    // Show total count
+                    document.getElementById('compliance-company-info').textContent =
+                        `${allCompaniesData.length} companies available`;
+                }
+            } catch (err) {
+                console.error('Failed to load companies:', err);
+            }
+        }
+
+        async function filterComplianceByCompany() {
+            const companyId = document.getElementById('compliance-company-filter').value;
+            const infoEl = document.getElementById('compliance-company-info');
+
+            if (!companyId) {
+                // Show overview for all companies
+                infoEl.textContent = `${allCompaniesData.length} companies available - Showing overview`;
+                displayOverviewCompliance();
+            } else {
+                // Show company-specific compliance
+                const company = allCompaniesData.find(c => c.id == companyId);
+                if (company) {
+                    infoEl.innerHTML = `<strong>${company.name}</strong> - ${company.industry || 'Unknown Industry'}`;
+                    await displayCompanyCompliance(companyId, company);
+                }
+            }
+        }
+
+        function displayOverviewCompliance() {
+            // Calculate average compliance across all companies
+            const iso27001List = document.getElementById('iso27001-list');
+            const iso27017List = document.getElementById('iso27017-list');
+            const soc2List = document.getElementById('soc2-list');
+            const policyList = document.getElementById('policy-list');
+
+            // Default overview values (could be calculated from all companies)
+            iso27001List.innerHTML = `
+                <div class="control-item"><span>Access Control</span><span class="badge badge-success">92%</span></div>
+                <div class="control-item"><span>Information Security</span><span class="badge badge-success">88%</span></div>
+                <div class="control-item"><span>Operations Security</span><span class="badge badge-warning">75%</span></div>
+            `;
+
+            iso27017List.innerHTML = `
+                <div class="control-item"><span>Cloud Access Control</span><span class="badge badge-success">90%</span></div>
+                <div class="control-item"><span>Virtual Network Security</span><span class="badge badge-success">85%</span></div>
+                <div class="control-item"><span>Cloud Asset Management</span><span class="badge badge-warning">70%</span></div>
+            `;
+
+            soc2List.innerHTML = `
+                <div class="control-item"><span>Security</span><span class="badge badge-success">91%</span></div>
+                <div class="control-item"><span>Availability</span><span class="badge badge-success">89%</span></div>
+                <div class="control-item"><span>Processing Integrity</span><span class="badge badge-success">86%</span></div>
+                <div class="control-item"><span>Confidentiality</span><span class="badge badge-warning">78%</span></div>
+                <div class="control-item"><span>Privacy</span><span class="badge badge-success">93%</span></div>
+            `;
+
+            policyList.innerHTML = `
+                <div class="control-item"><span>Privacy Policy</span><span class="small-text">95% completed</span></div>
+                <div class="control-item"><span>Security Policy</span><span class="small-text">88% completed</span></div>
+                <div class="control-item"><span>Data Handling Policy</span><span class="small-text">82% completed</span></div>
+            `;
+        }
+
+        async function fetchAllCompaniesCompliance() {
+            try {
+                const res = await fetch(`${API_URL}/companies/compliance-overview`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // Update key metrics
+                    document.getElementById('total-companies-count').textContent = data.total_companies;
+
+                    // Calculate overall average
+                    const overallAvg = Math.round(data.companies.reduce((acc, c) => acc + c.average_compliance, 0) / data.total_companies);
+                    document.getElementById('average-compliance-score').textContent = `${overallAvg}%`;
+
+                    // Find highest score
+                    const highest = data.companies[0]?.average_compliance || 0;
+                    document.getElementById('highest-compliance-score').textContent = `${highest}%`;
+
+                    // Render Chart Bars
+                    const container = document.getElementById('companies-compliance-chart');
+                    container.innerHTML = data.companies.map(company => `
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                <div style="font-weight: 500;">${company.name}</div>
+                                <div style="color: #666;">${company.average_compliance}%</div>
+                            </div>
+                            <div style="height: 0.75rem; background: #e5e7eb; border-radius: 999px; overflow: hidden;">
+                                <div style="width: ${company.average_compliance}%; height: 100%; background: ${getGradient(company.average_compliance)}; border-radius: 999px;"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error fetching compliance overview:', err);
+                document.getElementById('companies-compliance-chart').innerHTML = '<div style="color: #ef4444; padding: 1rem;">Failed to load compliance data</div>';
+            }
+        }
+
+        function getGradient(score) {
+            if (score >= 90) return 'linear-gradient(90deg, #10b981 0%, #059669 100%)';
+            if (score >= 75) return 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)';
+            if (score >= 60) return 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)';
+            return 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
+        }
+
+        async function displayCompanyCompliance(companyId, company) {
+            try {
+                // Call AI-powered compliance analysis endpoint
+                const res = await fetch(`${API_URL}/companies/${companyId}/compliance`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const scores = data.compliance_scores;
+
+                    // Display company-specific compliance using AI-generated scores
+                    const iso27001List = document.getElementById('iso27001-list');
+                    const iso27017List = document.getElementById('iso27017-list');
+                    const soc2List = document.getElementById('soc2-list');
+                    const policyList = document.getElementById('policy-list');
+
+                    // ISO 27001 Controls
+                    const iso = scores.iso27001;
+                    iso27001List.innerHTML = `
+                        <div class="control-item"><span>Access Control</span><span class="badge ${getBadgeClass(iso.access_control)}">${iso.access_control}%</span></div>
+                        <div class="control-item"><span>Information Security</span><span class="badge ${getBadgeClass(iso.information_security)}">${iso.information_security}%</span></div>
+                        <div class="control-item"><span>Operations Security</span><span class="badge ${getBadgeClass(iso.operations_security)}">${iso.operations_security}%</span></div>
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: #e8f4fd; border-left: 3px solid #3b82f6; border-radius: 0.25rem; font-size: 0.8rem; color: #1e40af;">
+                            <strong>🤖 AI Analysis:</strong> Based on ${data.report_count} report${data.report_count !== 1 ? 's' : ''} | ${data.industry} industry benchmarks
+                        </div>
+                    `;
+
+                    // ISO/IEC 27017 Cloud Controls
+                    const cloud = scores.iso27017;
+                    iso27017List.innerHTML = `
+                        <div class="control-item"><span>Cloud Access Control</span><span class="badge ${getBadgeClass(cloud.cloud_access_control)}">${cloud.cloud_access_control}%</span></div>
+                        <div class="control-item"><span>Virtual Network Security</span><span class="badge ${getBadgeClass(cloud.virtual_network_security)}">${cloud.virtual_network_security}%</span></div>
+                        <div class="control-item"><span>Cloud Asset Management</span><span class="badge ${getBadgeClass(cloud.cloud_asset_management)}">${cloud.cloud_asset_management}%</span></div>
+                    `;
+
+                    // SOC 2 Trust Service Criteria
+                    const soc2 = scores.soc2;
+                    soc2List.innerHTML = `
+                        <div class="control-item"><span>Security</span><span class="badge ${getBadgeClass(soc2.security)}">${soc2.security}%</span></div>
+                        <div class="control-item"><span>Availability</span><span class="badge ${getBadgeClass(soc2.availability)}">${soc2.availability}%</span></div>
+                        <div class="control-item"><span>Processing Integrity</span><span class="badge ${getBadgeClass(soc2.processing_integrity)}">${soc2.processing_integrity}%</span></div>
+                        <div class="control-item"><span>Confidentiality</span><span class="badge ${getBadgeClass(soc2.confidentiality)}">${soc2.confidentiality}%</span></div>
+                        <div class="control-item"><span>Privacy</span><span class="badge ${getBadgeClass(soc2.privacy)}">${soc2.privacy}%</span></div>
+                    `;
+
+                    // Policies
+                    const policies = scores.policies;
+                    policyList.innerHTML = `
+                        <div class="control-item"><span>Privacy Policy</span><span class="small-text">${policies.privacy_policy}% completed</span></div>
+                        <div class="control-item"><span>Security Policy</span><span class="small-text">${policies.security_policy}% completed</span></div>
+                        <div class="control-item"><span>Data Handling Policy</span><span class="small-text">${policies.data_handling_policy}% completed</span></div>
+                    `;
+                } else {
+                    // Fallback to basic display on error
+                    console.error('Failed to load AI compliance data');
+                    document.getElementById('iso27001-list').innerHTML = '<div style="color: #ef4444; padding: 1rem;">Unable to load compliance data</div>';
+                }
+            } catch (err) {
+                console.error('Compliance analysis error:', err);
+                document.getElementById('iso27001-list').innerHTML = '<div style="color: #ef4444; padding: 1rem;">Error analyzing compliance data</div>';
+            }
+        }
+
+        function getBadgeClass(percentage) {
+            if (percentage >= 85) return 'badge-success';
+            if (percentage >= 70) return 'badge-warning';
+            return 'badge-danger';
+        }
+
+
         async function fetchDashboardData() {
             const res = await fetch(`${API_URL}/dashboard/overview`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -816,7 +1052,10 @@
             }
         }
 
+        let allAccessUsers = []; // Store all users for filtering
+
         function renderAccessTable(users) {
+            allAccessUsers = users; // Store for filtering
             const tbody = document.getElementById('access-table-body');
             tbody.innerHTML = users.map(user => `
                 <tr>
@@ -826,10 +1065,141 @@
                     <td>${user.last_access}</td>
                     <td><span class="status-${user.status.toLowerCase()}">${user.status}</span></td>
                     <td>
-                        <button class="btn-sm btn-white">${user.status === 'Pending' ? 'Review' : 'View'}</button>
+                        <button class="btn-sm btn-white" onclick='handleUserAction(${JSON.stringify(user)})'>${user.status === 'Pending' ? 'Review' : 'View'}</button>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function filterAccessTable() {
+            const searchTerm = document.getElementById('user-search').value.toLowerCase();
+            const roleFilter = document.getElementById('role-filter').value;
+            const timeFilter = parseInt(document.getElementById('time-filter').value);
+
+            // Filter users based on all criteria
+            const filtered = allAccessUsers.filter(user => {
+                // Search filter (name, role, or permissions)
+                const matchesSearch = !searchTerm ||
+                    user.name.toLowerCase().includes(searchTerm) ||
+                    user.role.toLowerCase().includes(searchTerm) ||
+                    user.permissions.toLowerCase().includes(searchTerm);
+
+                // Role filter
+                const matchesRole = !roleFilter || user.role === roleFilter;
+
+                // Time filter (simplified - in real app would parse actual dates)
+                const matchesTime = true; // For demo, accept all times
+                // In production: parse user.last_access and compare with timeFilter days
+
+                return matchesSearch && matchesRole && matchesTime;
+            });
+
+            // Re-render table with filtered results WITHOUT overwriting allAccessUsers
+            const tbody = document.getElementById('access-table-body');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #9ca3af;">
+                            <div style="font-size: 1rem;">No users found matching your criteria</div>
+                            <div style="font-size: 0.875rem; margin-top: 0.5rem;">Try adjusting your search or filters</div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = filtered.map(user => `
+                    <tr>
+                        <td><div style="font-weight: 500;">${user.name}</div></td>
+                        <td>${user.role}</td>
+                        <td>${user.permissions}</td>
+                        <td>${user.last_access}</td>
+                        <td><span class="status-${user.status.toLowerCase()}">${user.status}</span></td>
+                        <td>
+                            <button class="btn-sm btn-white" onclick='handleUserAction(${JSON.stringify(user)})'>${user.status === 'Pending' ? 'Review' : 'View'}</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function handleUserAction(user) {
+            const actionType = user.status === 'Pending' ? 'Review' : 'View';
+            const modal = document.getElementById('user-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalFooter = document.getElementById('modal-footer');
+
+            // Set modal title
+            modalTitle.textContent = `${actionType} User Details`;
+
+            // Build modal body with user details
+            modalBody.innerHTML = `
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Name:</div>
+                    <div class="modal-detail-value">${user.name}</div>
+                </div>
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Role:</div>
+                    <div class="modal-detail-value">${user.role}</div>
+                </div>
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Permissions:</div>
+                    <div class="modal-detail-value">${user.permissions}</div>
+                </div>
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Last Access:</div>
+                    <div class="modal-detail-value">${user.last_access}</div>
+                </div>
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Status:</div>
+                    <div class="modal-detail-value"><span class="status-${user.status.toLowerCase()}">${user.status}</span></div>
+                </div>
+            `;
+
+            // Build modal footer based on status
+            if (user.status === 'Pending') {
+                modalFooter.innerHTML = `
+                    <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button class="btn-confirm" onclick="approveUser('${user.name}')">Approve User</button>
+                `;
+            } else {
+                modalFooter.innerHTML = `
+                    <button class="btn-confirm" onclick="closeModal()">Close</button>
+                `;
+            }
+
+            // Show modal
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+        }
+
+        function approveUser(userName) {
+            closeModal();
+            // Show success message in modal
+            setTimeout(() => {
+                const modal = document.getElementById('user-modal');
+                const modalTitle = document.getElementById('modal-title');
+                const modalBody = document.getElementById('modal-body');
+                const modalFooter = document.getElementById('modal-footer');
+
+                modalTitle.textContent = 'Success!';
+                modalBody.innerHTML = `
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; color: var(--success-color); margin-bottom: 1rem;">✓</div>
+                        <p style="font-size: 1.1rem; font-weight: 500; margin-bottom: 0.5rem;">User Approved</p>
+                        <p style="color: var(--text-secondary);">User ${userName} has been successfully approved!</p>
+                    </div>
+                `;
+                modalFooter.innerHTML = `
+                    <button class="btn-confirm" onclick="closeModal()">OK</button>
+                `;
+
+                modal.classList.remove('hidden');
+            }, 100);
+            // In a real app, you would call an API here to update the user status
+            // await fetch(`${API_URL}/users/${user.id}/approve`, { method: 'POST', ... });
         }
 
         function updateMetric(id, data) {

@@ -26,9 +26,19 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    jwt.init_app(app)
-    # Enable CORS for all domains on all routes
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Enable CORS for all domains including file:// protocol (null origin)
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": False
+        }
+    })
+    
+    # Disable strict slashes to prevent redirects that break CORS preflight
+    app.url_map.strict_slashes = False
     
     # Register blueprints
     from backend1.app.routes import auth_bp, dashboard_bp, admin_bp, reports_bp
