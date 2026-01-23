@@ -21,7 +21,7 @@ bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 def get_reports():
     """Get all reports (filtered by user role)"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user:
@@ -47,7 +47,7 @@ def get_reports():
 def get_report(report_id):
     """Get specific report by ID"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         report = Report.query.get(report_id)
@@ -135,7 +135,7 @@ def create_report():
 def update_report(report_id):
     """Update a report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         report = Report.query.get(report_id)
@@ -147,6 +147,75 @@ def update_report(report_id):
             return jsonify({'error': 'Access denied'}), 403
         
         data = request.get_json()
+        
+        # Handle approval workflow
+        if 'status' in data and data['status'] == 'approved':
+            # Extract company name and year from the request
+            company_name = data.get('company_name', '').strip()
+            report_year = data.get('report_year')
+            
+            warning_message = None
+            
+            if company_name and report_year:
+                from backend1.app.models.company import Company
+                from backend1.app.models.annual_report import AnnualReport
+                
+                # Check if company exists by name (case-insensitive)
+                company = Company.query.filter(Company.name.ilike(company_name)).first()
+                
+                if company:
+                    # Company exists, check if report year already exists
+                    existing_report = AnnualReport.query.filter_by(
+                        company_id=company.id,
+                        year=report_year
+                    ).first()
+                    
+                    if existing_report:
+                        # Report year already exists - warn user
+                        warning_message = f"Warning: Company '{company_name}' already has a report for year {report_year}"
+                    else:
+                        # Add new annual report to existing company
+                        new_annual_report = AnnualReport(
+                            company_id=company.id,
+                            year=report_year,
+                            title=report.title,
+                            report_type='Annual Report',
+                            pdf_url=f"https://www.annualreports.com/Companies?search={company.ticker}" if company.ticker else None
+                        )
+                        db.session.add(new_annual_report)
+                        report.company_id = company.id
+                        report.source_annual_report_id = new_annual_report.id
+                        
+                else:
+                    # Company doesn't exist - create new company
+                    # Extract ticker from filename if available
+                    ticker = None
+                    if report.file_path:
+                        filename = report.file_path.split('/')[-1]
+                        import re
+                        match = re.match(r'(?:NYSE_|NASDAQ_)?([A-Za-z]+)(?:_\d{4})?\.pdf', filename, re.IGNORECASE)
+                        if match:
+                            ticker = match.group(1).upper()
+                    
+                    new_company = Company(
+                        name=company_name,
+                        ticker=ticker,
+                        source_url=f"https://www.annualreports.com/Companies?search={ticker}" if ticker else "https://www.annualreports.com/"
+                    )
+                    db.session.add(new_company)
+                    db.session.flush()  # Get the company ID
+                    
+                    # Add annual report for the new company
+                    new_annual_report = AnnualReport(
+                        company_id=new_company.id,
+                        year=report_year,
+                        title=report.title,
+                        report_type='Annual Report',
+                        pdf_url=f"https://www.annualreports.com/Companies?search={ticker}" if ticker else None
+                    )
+                    db.session.add(new_annual_report)
+                    report.company_id = new_company.id
+                    report.source_annual_report_id = new_annual_report.id
         
         # Update fields if provided
         if 'title' in data:
@@ -162,10 +231,15 @@ def update_report(report_id):
         
         db.session.commit()
         
-        return jsonify({
+        response_data = {
             'message': 'Report updated successfully',
             'report': report.to_dict()
-        }), 200
+        }
+        
+        if warning_message:
+            response_data['warning'] = warning_message
+        
+        return jsonify(response_data), 200
         
     except Exception as e:
         db.session.rollback()
@@ -177,7 +251,7 @@ def update_report(report_id):
 def review_report(report_id):
     """Review a report (admin only)"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if user.role != 'admin':
@@ -213,7 +287,7 @@ def review_report(report_id):
 def delete_report(report_id):
     """Delete a report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         report = Report.query.get(report_id)
@@ -239,7 +313,7 @@ def delete_report(report_id):
 def get_report_stats():
     """Get report statistics"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         # Get base query

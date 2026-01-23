@@ -113,30 +113,31 @@
                     <!-- Compliance Card -->
                     <div class="card">
                         <div class="metric-header">
-                            <span class="metric-title">Overall Compliance</span>
+                            <span class="metric-title">Real-Time Compliance</span>
                             <span class="icon-success">✔</span>
                         </div>
-                        <div class="metric-value" id="score-compliance">--%</div>
+                        <div class="metric-value" id="rt-score-compliance">Pending...</div>
                         <div class="metric-trend trend-up">
-                            <span>↗</span> <span id="trend-compliance">+0% from last month</span>
+                            <span>↗</span> <span id="rt-trend-compliance">Syncing...</span>
                         </div>
                         <div class="progress-bar">
-                            <div class="progress-fill" id="bar-compliance" style="width: 0%"></div>
+                            <div class="progress-fill" id="rt-bar-compliance" style="width: 0%"></div>
                         </div>
+                        <div style="font-size: 0.7rem; color: #999; margin-top: 5px;" id="rt-timestamp"></div>
                     </div>
 
                     <!-- Data Quality Card -->
                     <div class="card">
                         <div class="metric-header">
-                            <span class="metric-title">Data Quality Score</span>
+                            <span class="metric-title">Security Quality Score</span>
                             <span style="color: #2563eb">⚡</span>
                         </div>
-                        <div class="metric-value" id="score-quality">--%</div>
+                        <div class="metric-value" id="rt-score-quality">Pending...</div>
                         <div class="metric-trend trend-up">
-                            <span>↗</span> <span id="trend-quality">+0% from last month</span>
+                            <span>↗</span> <span id="rt-trend-quality">Syncing...</span>
                         </div>
                         <div class="progress-bar">
-                            <div class="progress-fill" id="bar-quality" style="width: 0%"></div>
+                            <div class="progress-fill" id="rt-bar-quality" style="width: 0%"></div>
                         </div>
                     </div>
 
@@ -167,8 +168,9 @@
                         <div class="metric-trend">
                             <span style="color: #666">Requires attention</span>
                         </div>
-                        <button class="btn-outline"
-                            style="width: 100%; justify-content: center; margin-top: 1rem;">Review Now</button>
+                        <button class="btn-outline" onclick="switchTab('documents')"
+                            style="width: 100%; justify-content: center; margin-top: 1rem; cursor: pointer;">Review
+                            Now</button>
                     </div>
                 </div>
 
@@ -248,13 +250,7 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
-                        <h4>Submitted Evidence & Documents</h4>
-                        <div id="submitted-docs-list"
-                            style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
-                            <!-- Dynamic Content -->
-                        </div>
-                    </div>
+
                 </div>
             </div>
 
@@ -262,8 +258,74 @@
             <div id="tab-companies" class="tab-content hidden">
                 <div class="card">
                     <h3>Company Data from AnnualReports.com</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Real annual reports and company
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">Real annual reports and company
                         information for compliance analysis</p>
+
+                    <!-- Statistics Summary -->
+                    <div
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <div
+                            style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                            <div style="text-align: center; color: white;">
+                                <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;"
+                                    id="total-companies-count">--</div>
+                                <div
+                                    style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">
+                                    Companies</div>
+                            </div>
+                            <div style="width: 2px; height: 60px; background: rgba(255,255,255,0.3);"></div>
+                            <div style="text-align: center; color: white;">
+                                <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;"
+                                    id="total-reports-count">--</div>
+                                <div
+                                    style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">
+                                    Annual Reports</div>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: rgba(255,255,255,0.8);"
+                            id="stats-summary">
+                            Loading statistics...
+                        </div>
+                    </div>
+
+                    <!-- Search and Sort Controls -->
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+                        <!-- Search Bar -->
+                        <div style="flex: 1; min-width: 250px; position: relative;">
+                            <input type="text" id="company-search" placeholder="Search companies by name or ticker..."
+                                style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.2s;"
+                                onkeyup="filterAndSortCompanies()"
+                                onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+                                onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'" />
+                            <svg style="position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #9ca3af;"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+
+                        <!-- Sort Dropdown -->
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <label for="company-sort"
+                                style="font-weight: 600; font-size: 0.9rem; color: #4b5563; white-space: nowrap;">Sort
+                                by:</label>
+                            <select id="company-sort" onchange="filterAndSortCompanies()"
+                                style="padding: 0.75rem 2.5rem 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; background-color: white; cursor: pointer; transition: all 0.2s;"
+                                onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+                                onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                                <option value="name-asc">Name (A-Z)</option>
+                                <option value="name-desc">Name (Z-A)</option>
+                                <option value="reports-desc">Most Reports</option>
+                                <option value="reports-asc">Fewest Reports</option>
+                                <option value="ticker-asc">Ticker (A-Z)</option>
+                            </select>
+                        </div>
+
+                        <!-- Results Count -->
+                        <div style="font-size: 0.9rem; color: #6b7280; white-space: nowrap;">
+                            <span id="filtered-count">0</span> <span id="filtered-label">companies</span>
+                        </div>
+                    </div>
 
                     <div id="companies-list" style="display: grid; gap: 1.5rem;">
                         <p style="color: #666;">Loading companies...</p>
@@ -344,6 +406,44 @@
                             <!-- Dynamic Data -->
                         </tbody>
                     </table>
+
+                    <!-- Pending Document Reviews Section -->
+                    <div style="margin-top: 3rem; border-top: 1px solid #e5e7eb; padding-top: 2rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: #1e3a8a; margin: 0;">Pending Document Reviews</h4>
+                            <div>
+                                <span id="debug-doc-count"
+                                    style="font-size: 0.8rem; color: #666; margin-right: 1rem;"></span>
+                                <button onclick="fetchComplianceDocs()" class="btn-sm"
+                                    style="background: #f3f4f6; border: 1px solid #d1d5db;">Refresh List</button>
+                            </div>
+                        </div>
+                        <div id="submitted-docs-list"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                            <!-- Populated by fetchComplianceDocs() -->
+                            <p style="color: #6b7280; font-style: italic;">Loading pending reviews...</p>
+                        </div>
+                    </div>
+
+                    <!-- Uploaded Documents Section -->
+                    <div style="margin-top: 3rem; border-top: 1px solid #e5e7eb; padding-top: 2rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: #1e3a8a; margin: 0;">Uploaded Documents</h4>
+                            <div>
+                                <span id="uploaded-docs-count"
+                                    style="font-size: 0.8rem; color: #666; margin-right: 1rem;"></span>
+                                <button onclick="fetchAllDocuments()" class="btn-sm"
+                                    style="background: #f3f4f6; border: 1px solid #d1d5db;">Refresh List</button>
+                            </div>
+                        </div>
+                        <div id="all-docs-list"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                            <!-- Populated by fetchAllDocuments() -->
+                            <p style="color: #6b7280; font-style: italic;">Loading documents...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -434,6 +534,10 @@
     </div>
 
     <script>
+        let allDocuments = [];
+        let allAccessUsers = [];
+        let allCompaniesData = []; // Store all companies data for filtering/sorting
+        let companiesReportCounts = {}; // Store report counts per company
         const API_URL = 'http://localhost:5000/api';
         let token = localStorage.getItem('token');
         let charts = {};
@@ -543,7 +647,179 @@
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
             document.getElementById('user-display').textContent = user.username;
-            fetchDashboardData();
+            fetchOverviewData(); // Load overview data on initial dashboard load
+        }
+
+        async function fetchDashboardData() {
+            try {
+                // Fetch Compliance Overview Data
+                const res = await fetch(`${API_URL}/companies/compliance-overview`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // Calculate overall averages
+                    const companies = data.companies;
+                    const totalCompliance = Math.round(companies.reduce((acc, c) => acc + c.average_compliance, 0) / companies.length) || 0;
+
+                    // Update Overall Compliance Card
+                    document.getElementById('rt-score-compliance').textContent = `${totalCompliance}%`;
+                    document.getElementById('rt-bar-compliance').style.width = `${totalCompliance}%`;
+                    document.getElementById('rt-trend-compliance').textContent = `Based on ${data.total_companies} companies`;
+
+                    // Update timestamp
+                    if (document.getElementById('rt-timestamp')) {
+                        document.getElementById('rt-timestamp').textContent = `Last Sync: ${new Date().toLocaleTimeString()}`;
+                    }
+
+                    // Update Data Quality Card (using average of ISO 27001 info security as proxy for quality)
+                    const qualityScore = Math.round(companies.reduce((acc, c) => acc + c.compliance_scores.iso27001.information_security, 0) / companies.length) || 0;
+                    document.getElementById('rt-score-quality').textContent = `${qualityScore}%`;
+                    document.getElementById('rt-bar-quality').style.width = `${qualityScore}%`;
+                    document.getElementById('rt-trend-quality').textContent = `+${Math.round(Math.random() * 5)}% from last month`; // Simulated trend
+
+                    // Update Alerts (Simulated based on low scores)
+                    const lowScoreCount = companies.filter(c => c.average_compliance < 70).length;
+                    const activeAlerts = lowScoreCount + 3; // Base alerts + low performing companies
+                    if (document.getElementById('score-alerts')) {
+                        document.getElementById('score-alerts').textContent = activeAlerts;
+                    }
+
+                    // Update Pending Reviews (based on report count)
+                    const totalReports = companies.reduce((acc, c) => acc + c.report_count, 0);
+                    if (document.getElementById('score-reviews')) {
+                        document.getElementById('score-reviews').textContent = Math.round(totalReports / 5); // Simulated pending reviews
+                    }
+
+                    // Render Compliance Trend Chart
+                    renderComplianceChart(data.companies);
+                }
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+            }
+        }
+
+        // --- OVERVIEW TAB DATA ---
+        async function fetchOverviewData() {
+            try {
+                // Fetch companies count
+                const companiesRes = await fetch(`${API_URL}/companies?per_page=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const companiesData = await companiesRes.json();
+                const totalCompanies = companiesData.companies ? companiesData.companies.length : 0;
+
+                // Fetch all reports to count statuses
+                const reportsRes = await fetch(`${API_URL}/reports/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const reportsData = await reportsRes.json();
+                const allReports = reportsData.reports || [];
+
+                // Calculate metrics
+                const approvedReports = allReports.filter(r => r.status === 'approved').length;
+                const pendingReports = allReports.filter(r => r.status === 'submitted').length;
+                const rejectedReports = allReports.filter(r => r.status === 'rejected').length;
+                const totalReports = allReports.length;
+
+                // Calculate compliance score (approved / total)
+                const complianceScore = totalReports > 0 ? Math.round((approvedReports / totalReports) * 100) : 0;
+
+                // Calculate data quality score based on reports with descriptions
+                const reportsWithDesc = allReports.filter(r => r.description && r.description.trim().length > 0).length;
+                const qualityScore = totalReports > 0 ? Math.round((reportsWithDesc / totalReports) * 100) : 0;
+
+                // Update Real-Time Compliance
+                document.getElementById('rt-score-compliance').textContent = `${complianceScore}%`;
+                document.getElementById('rt-trend-compliance').textContent = `${approvedReports} approved of ${totalReports}`;
+                document.getElementById('rt-bar-compliance').style.width = `${complianceScore}%`;
+                document.getElementById('rt-timestamp').textContent = `Last updated: ${new Date().toLocaleString()}`;
+
+                // Update Security Quality Score
+                document.getElementById('rt-score-quality').textContent = `${qualityScore}%`;
+                document.getElementById('rt-trend-quality').textContent = `${reportsWithDesc} with metadata`;
+                document.getElementById('rt-bar-quality').style.width = `${qualityScore}%`;
+
+                // Update Active Alerts (using rejected as alerts)
+                document.getElementById('score-alerts').textContent = rejectedReports;
+                document.getElementById('trend-alerts').textContent = `${rejectedReports} total rejected`;
+                // For demo, distribute alerts randomly
+                const highAlerts = Math.floor(rejectedReports * 0.3);
+                const medAlerts = Math.floor(rejectedReports * 0.4);
+                const lowAlerts = rejectedReports - highAlerts - medAlerts;
+                document.getElementById('alert-high').textContent = highAlerts;
+                document.getElementById('alert-med').textContent = medAlerts;
+                document.getElementById('alert-low').textContent = lowAlerts;
+
+                // Update Pending Reviews
+                document.getElementById('score-reviews').textContent = pendingReports;
+
+                // Update charts if Chart.js is available
+                updateOverviewCharts(companiesData, allReports);
+
+            } catch (err) {
+                console.error('Error fetching overview data:', err);
+                document.getElementById('rt-score-compliance').textContent = 'Error';
+                document.getElementById('rt-score-quality').textContent = 'Error';
+            }
+        }
+
+        function updateOverviewCharts(companiesData, reports) {
+            // Compliance Trend Chart (mock data based on report statuses)
+            const complianceTrendCtx = document.getElementById('complianceChart');
+            if (complianceTrendCtx && typeof Chart !== 'undefined') {
+                if (charts.compliance) charts.compliance.destroy();
+                charts.compliance = new Chart(complianceTrendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Compliance Score',
+                            data: [65, 70, 75, 80, 85, Math.round((reports.filter(r => r.status === 'approved').length / reports.length) * 100)],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, max: 100 }
+                        }
+                    }
+                });
+            }
+
+            // ISO 27001 Controls Chart
+            const iso27001Ctx = document.getElementById('iso27001Chart');
+            if (iso27001Ctx && typeof Chart !== 'undefined') {
+                if (charts.iso27001) charts.iso27001.destroy();
+                const approved = reports.filter(r => r.status === 'approved').length;
+                const pending = reports.filter(r => r.status === 'submitted').length;
+                const rejected = reports.filter(r => r.status === 'rejected').length;
+
+                charts.iso27001 = new Chart(iso27001Ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Approved', 'Pending', 'Rejected'],
+                        datasets: [{
+                            data: [approved, pending, rejected],
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
         }
 
         // --- TAB LOGIC ---
@@ -561,7 +837,9 @@
                 document.querySelectorAll('.tab-btn')[index].classList.add('active');
             }
 
-            if (tabId === 'documents') {
+            if (tabId === 'overview') {
+                fetchOverviewData();
+            } else if (tabId === 'documents') {
                 fetchDocuments();
             } else if (tabId === 'compliance') {
                 populateComplianceCompanyFilter();
@@ -570,43 +848,152 @@
                 fetchCompanies();
             } else if (tabId === 'data-quality') {
                 fetchAllCompaniesCompliance();
+            } else if (tabId === 'access') {
+                fetchComplianceDocs();
+                fetchUsers(); // Fetch users for the access control table
+                fetchAllDocuments(); // Fetch all uploaded documents
             }
         }
 
         async function fetchComplianceDocs() {
+            const container = document.getElementById('submitted-docs-list');
+            try {
+                // container.innerHTML = '<p style="color: #6b7280; font-style: italic;">Loading pending reviews...</p>'; // Optional: Reset loading state
+                const res = await fetch(`${API_URL}/reports/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (res.ok && data.reports) {
+                    const submitted = data.reports.filter(r => r.status === 'submitted' || r.status === 'reviewed' || r.status === 'approved');
+                    console.log('Fetched API Reports:', data.reports.length, 'Submitted:', submitted.length);
+
+                    if (document.getElementById('debug-doc-count')) {
+                        document.getElementById('debug-doc-count').textContent = `Found: ${submitted.length} / ${data.reports.length}`;
+                    }
+
+                    if (submitted.length > 0) {
+                        container.innerHTML = submitted.map(doc => {
+                            // Extract company ticker from filename for AnnualReports.com link
+                            let companyTicker = '';
+                            let annualReportsUrl = 'https://www.annualreports.com/';
+
+                            if (doc.file_path) {
+                                const filename = doc.file_path.split('/').pop();
+                                const match = filename.match(/(?:NYSE_|NASDAQ_)?([A-Za-z]+)(?:_\d{4})?\.pdf/i);
+                                if (match) {
+                                    companyTicker = match[1];
+                                    annualReportsUrl = `https://www.annualreports.com/Companies?search=${companyTicker}`;
+                                }
+                            }
+
+                            return `
+                            <div class="card" style="padding: 1rem; border: 1px solid #e5e7eb;">
+                                <div style="font-weight: 600;">${doc.title}</div>
+                                <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">${doc.report_type}</div>
+                                <div style="margin-top: 0.5rem;">
+                                    <span class="badge badge-${doc.status === 'approved' ? 'success' : (doc.status === 'rejected' ? 'low' : 'medium')}">${doc.status}</span>
+                                    ${doc.file_path ? `<a href="${annualReportsUrl}" target="_blank" style="font-size: 0.8rem; color: #2563eb; margin-left: 0.5rem;" title="View on AnnualReports.com${companyTicker ? ' - ' + companyTicker : ''}">View Report</a>` : ''}
+                                </div>
+                                <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #f3f4f6; display: flex; gap: 0.5rem;">
+                                    <button onclick='handleApproveDocument(${JSON.stringify(doc).replace(/'/g, "\\'")})' class="btn-sm" style="background: #d1fae5; color: #047857; border: none; font-size: 0.75rem;">Approve</button>
+                                    <button onclick='handleRejectDocument(${JSON.stringify(doc).replace(/'/g, "\\'")})' class="btn-sm" style="background: #fee2e2; color: #dc2626; border: none; font-size: 0.75rem;">Reject</button>
+                                    <button onclick="deleteReport(${doc.id})" class="btn-sm" style="background: white; border: 1px solid #e5e7eb; color: #6b7280; font-size: 0.75rem;">Delete</button>
+                                </div>
+                            </div>
+                        `}).join('');
+                    } else {
+                        container.innerHTML = '<p style="color: #666; font-style: italic;">No submitted documents pending review.</p>';
+                    }
+                } else {
+                    console.error('Failed to fetch reports:', data);
+                    container.innerHTML = `<p style="color: #ef4444;">Error loading reviews: ${data.error || res.statusText}</p>`;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color: #ef4444;">Network error loading reviews.</p>`;
+            }
+        }
+
+        async function fetchAllDocuments() {
+            const container = document.getElementById('all-docs-list');
             try {
                 const res = await fetch(`${API_URL}/reports/`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
 
-                const container = document.getElementById('submitted-docs-list');
-                if (data.reports) {
-                    const submitted = data.reports.filter(r => r.status === 'submitted' || r.status === 'reviewed' || r.status === 'approved');
+                if (res.ok && data.reports) {
+                    console.log('Fetched All Documents:', data.reports.length);
 
-                    if (submitted.length > 0) {
-                        container.innerHTML = submitted.map(doc => `
+                    if (document.getElementById('uploaded-docs-count')) {
+                        document.getElementById('uploaded-docs-count').textContent = `Total: ${data.reports.length}`;
+                    }
+
+                    if (data.reports.length > 0) {
+                        container.innerHTML = data.reports.map(doc => {
+                            const statusColor = doc.status === 'approved' ? 'success' :
+                                (doc.status === 'rejected' ? 'low' :
+                                    (doc.status === 'submitted' ? 'medium' : 'low'));
+
+                            const hasFile = doc.file_path && doc.file_path !== '';
+
+                            // Extract company ticker from filename for AnnualReports.com link
+                            let companyTicker = '';
+                            if (hasFile && doc.file_path) {
+                                // Extract filename from path (e.g., "uploads/NYSE_ALSN_2023.pdf" -> "NYSE_ALSN_2023.pdf")
+                                const filename = doc.file_path.split('/').pop();
+
+                                // Try to extract ticker from patterns like:
+                                // "NYSE_ALSN_2023.pdf" -> "ALSN"
+                                // "alsn_2023.pdf" -> "alsn"
+                                const match = filename.match(/(?:NYSE_|NASDAQ_)?([A-Za-z]+)(?:_\d{4})?\.pdf/i);
+                                if (match) {
+                                    companyTicker = match[1];
+                                }
+                            }
+
+                            // Generate AnnualReports.com search URL
+                            const annualReportsUrl = companyTicker
+                                ? `https://www.annualreports.com/Companies?search=${companyTicker}`
+                                : 'https://www.annualreports.com/';
+
+                            return `
                             <div class="card" style="padding: 1rem; border: 1px solid #e5e7eb;">
-                                <div style="font-weight: 600;">${doc.title}</div>
-                                <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">${doc.report_type}</div>
-                                <div style="margin-top: 0.5rem;">
-                                    <span class="badge badge-${doc.status === 'approved' ? 'success' : 'medium'}">${doc.status}</span>
-                                    ${doc.file_path ? `<a href="${API_URL.replace('/api', '')}/static/${doc.file_path}" target="_blank" style="font-size: 0.8rem; color: #2563eb; margin-left: 0.5rem;">View File</a>` : ''}
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">${doc.title}</div>
+                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">${doc.report_type}</div>
+                                <div style="margin-bottom: 0.75rem;">
+                                    <span class="badge badge-${statusColor}">${doc.status.toUpperCase()}</span>
+                                    ${hasFile ?
+                                    `<span class="badge badge-success" style="margin-left: 0.5rem;">📎 File Uploaded</span>` :
+                                    `<span class="badge" style="margin-left: 0.5rem; background: #f3f4f6; color: #6b7280;">No File</span>`
+                                }
                                 </div>
-                                <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #f3f4f6; display: flex; gap: 0.5rem;">
-                                    <button onclick="updateReportStatus(${doc.id}, 'rejected')" class="btn-sm" style="background: #fee2e2; color: #dc2626; border: none; font-size: 0.75rem;">Reject</button>
-                                    <button onclick="deleteReport(${doc.id})" class="btn-sm" style="background: white; border: 1px solid #e5e7eb; color: #6b7280; font-size: 0.75rem;">Delete</button>
+                                ${doc.description ? `<p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 0.75rem;">${doc.description}</p>` : ''}
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    ${hasFile ?
+                                    `<a href="${annualReportsUrl}" target="_blank" class="btn-sm" style="background: #2563eb; color: white; text-decoration: none; border: none; font-size: 0.75rem;" title="View on AnnualReports.com${companyTicker ? ' - ' + companyTicker : ''}">📄 View Report</a>` :
+                                    ''
+                                }
+                                    <span style="font-size: 0.75rem; color: #9ca3af; margin-left: auto;">
+                                        ${new Date(doc.created_at).toLocaleDateString()}
+                                    </span>
                                 </div>
                             </div>
-                        `).join('');
+                        `}).join('');
                     } else {
-                        container.innerHTML = '<p style="color: #666; font-style: italic;">No submitted documents yet.</p>';
+                        container.innerHTML = '<p style="color: #666; font-style: italic;">No documents found.</p>';
                     }
+                } else {
+                    console.error('Failed to fetch documents:', data);
+                    container.innerHTML = `<p style="color: #ef4444;">Error loading documents: ${data.error || res.statusText}</p>`;
                 }
             } catch (err) {
                 console.error(err);
+                container.innerHTML = `<p style="color: #ef4444;">Network error loading documents.</p>`;
             }
         }
+
 
         async function handleUpload(e) {
             e.preventDefault();
@@ -684,13 +1071,18 @@
 
         async function fetchCompanies() {
             try {
-                const res = await fetch(`${API_URL}/companies`, {
+                const res = await fetch(`${API_URL}/companies?per_page=100`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
 
                 const container = document.getElementById('companies-list');
                 if (data.companies && data.companies.length > 0) {
+                    const totalCompanies = data.companies.length;
+
+                    // Update statistics display
+                    document.getElementById('total-companies-count').textContent = totalCompanies;
+
                     container.innerHTML = data.companies.map(company => `
                         <div class="card" style="padding: 1.5rem; border: 2px solid #e5e7eb;">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
@@ -729,9 +1121,33 @@
                         </div>
                     `).join('');
 
-                    // Fetch reports for each company
-                    data.companies.forEach(company => fetchCompanyReports(company.id));
+                    // Store companies data globally for filtering/sorting
+                    allCompaniesData = data.companies;
+
+                    // Fetch reports for each company and calculate total reports
+                    let totalReports = 0;
+                    const reportPromises = data.companies.map(async (company) => {
+                        const count = await fetchCompanyReports(company.id);
+                        companiesReportCounts[company.id] = count; // Store count
+                        return count;
+                    });
+
+                    // Wait for all report fetches to complete
+                    const reportCounts = await Promise.all(reportPromises);
+                    totalReports = reportCounts.reduce((sum, count) => sum + count, 0);
+
+                    // Update total reports count
+                    document.getElementById('total-reports-count').textContent = totalReports;
+                    document.getElementById('stats-summary').textContent = `Data from AnnualReports.com • Last updated: ${new Date().toLocaleDateString()}`;
+
+                    // Initial filter count update
+                    document.getElementById('filtered-count').textContent = data.companies.length;
                 } else {
+                    // Update with zero counts
+                    document.getElementById('total-companies-count').textContent = '0';
+                    document.getElementById('total-reports-count').textContent = '0';
+                    document.getElementById('stats-summary').textContent = 'No data available';
+
                     container.innerHTML = `
                         <div style="text-align: center; padding: 3rem; color: #9ca3af;">
                             <p style="font-size: 1.1rem; margin-bottom: 1rem;">No companies found in database</p>
@@ -781,14 +1197,110 @@
                             </div>
                         `;
                     }
+
+                    return data.reports.length; // Return count for statistics
                 } else {
                     countBadge.textContent = '0 Reports';
                     container.innerHTML = '<span style="color: #9ca3af; font-size: 0.875rem;">No reports available</span>';
+                    return 0; // Return 0 if no reports
                 }
             } catch (err) {
                 console.error(err);
+                return 0; // Return 0 on error
             }
         }
+
+        function filterAndSortCompanies() {
+            if (!allCompaniesData || allCompaniesData.length === 0) return;
+
+            const searchTerm = document.getElementById('company-search').value.toLowerCase();
+            const sortOption = document.getElementById('company-sort').value;
+
+            // Filter companies
+            let filteredCompanies = allCompaniesData.filter(company => {
+                const nameMatch = company.name.toLowerCase().includes(searchTerm);
+                const tickerMatch = company.ticker && company.ticker.toLowerCase().includes(searchTerm);
+                return nameMatch || tickerMatch;
+            });
+
+            // Sort companies
+            filteredCompanies.sort((a, b) => {
+                switch (sortOption) {
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'reports-desc':
+                        const countA = companiesReportCounts[a.id] || 0;
+                        const countB = companiesReportCounts[b.id] || 0;
+                        return countB - countA;
+                    case 'reports-asc':
+                        const countA2 = companiesReportCounts[a.id] || 0;
+                        const countB2 = companiesReportCounts[b.id] || 0;
+                        return countA2 - countB2;
+                    case 'ticker-asc':
+                        const tickerA = a.ticker || '';
+                        const tickerB = b.ticker || '';
+                        return tickerA.localeCompare(tickerB);
+                    default:
+                        return 0;
+                }
+            });
+
+            // Update filtered count
+            document.getElementById('filtered-count').textContent = filteredCompanies.length;
+            document.getElementById('filtered-label').textContent = filteredCompanies.length === 1 ? 'company' : 'companies';
+
+            // Render filtered and sorted companies
+            const container = document.getElementById('companies-list');
+            if (filteredCompanies.length > 0) {
+                container.innerHTML = filteredCompanies.map(company => `
+                    <div class="card" style="padding: 1.5rem; border: 2px solid #e5e7eb;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
+                                    ${company.name}
+                                </h4>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    ${company.ticker ? `<span class="badge badge-success">${company.ticker}</span>` : ''}
+                                    ${company.exchange ? `<span class="badge badge-low">${company.exchange}</span>` : ''}
+                                    ${company.industry ? `<span class="badge badge-medium">${company.industry}</span>` : ''}
+                                </div>
+                            </div>
+                            ${company.website ? `
+                                <a href="${company.website}" target="_blank" class="btn-sm btn-white">
+                                    Visit Website
+                                </a>
+                            ` : ''}
+                        </div>
+                        
+                        ${company.description ? `
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">
+                                ${company.description.substring(0, 200)}${company.description.length > 200 ? '...' : ''}
+                            </p>
+                        ` : ''}
+                        
+                        <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem; margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <h5 style="font-weight: 600; font-size: 0.95rem;">Annual Reports</h5>
+                                <span class="badge badge-success" id="company-${company.id}-count">${companiesReportCounts[company.id] || 0} Reports</span>
+                            </div>
+                            <div id="company-${company.id}-reports" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem;">
+                                <span style="color: #9ca3af; font-size: 0.875rem;">Reports already loaded</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+                        <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No companies match your search</p>
+                        <p style="font-size: 0.9rem;">Try a different search term</p>
+                    </div>
+                `;
+            }
+        }
+
 
         async function updateReportStatus(id, newStatus) {
             try {
@@ -803,7 +1315,8 @@
 
                 if (res.ok) {
                     alert(`Document ${newStatus} successfully!`);
-                    fetchDocuments(); // Refresh list if on Documents tab
+                    fetchDocuments();        // Refresh user's document list
+                    fetchComplianceDocs();   // Refresh admin's pending review list
                 } else {
                     const data = await res.json();
                     alert(data.error || 'Update failed');
@@ -814,8 +1327,225 @@
             }
         }
 
+        async function deleteReport(id) {
+            if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/reports/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (res.ok) {
+                    alert('Document deleted successfully!');
+                    fetchDocuments();        // Refresh user's document list
+                    fetchComplianceDocs();   // Refresh admin's pending review list
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Delete failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error');
+            }
+        }
+
+        async function handleApproveDocument(doc) {
+            // Show custom approval dialog
+            const modal = document.getElementById('user-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalFooter = document.getElementById('modal-footer');
+
+            modalTitle.textContent = 'Approve Document';
+
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <p style="color: #374151; margin-bottom: 1rem;">Please confirm the document details before approval:</p>
+                    
+                    <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                        <div style="margin-bottom: 0.75rem;">
+                            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Document Title:</label>
+                            <div style="color: #6b7280;">${doc.title}</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 0.75rem;">
+                            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Report Type:</label>
+                            <select id="approve-report-type" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+                                <option value="audit" ${doc.report_type === 'audit' ? 'selected' : ''}>Annual Reports</option>
+                                <option value="policy" ${doc.report_type === 'policy' ? 'selected' : ''}>Policy Documents</option>
+                                <option value="evidence" ${doc.report_type === 'evidence' ? 'selected' : ''}>Compliance Evidence</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 0.75rem;">
+                            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Company Name: <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="approve-company-name" placeholder="Enter company name (e.g., Allison Transmission)" 
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                                value="">
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Report Year: <span style="color: #dc2626;">*</span></label>
+                            <input type="number" id="approve-report-year" placeholder="Enter year (e.g., 2023)" 
+                                min="1900" max="2100"
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                                value="2023">
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 0.875rem; color: #6b7280;">
+                        <strong>Note:</strong> This will mark the document as approved and associate it with the specified company.
+                    </p>
+                </div>
+            `;
+
+            modalFooter.innerHTML = `
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" onclick="confirmApproval(${doc.id})">Confirm Approval</button>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        async function confirmApproval(docId) {
+            const reportType = document.getElementById('approve-report-type').value;
+            const companyName = document.getElementById('approve-company-name').value.trim();
+            const reportYear = parseInt(document.getElementById('approve-report-year').value);
+
+            if (!companyName) {
+                alert('Please enter a company name');
+                return;
+            }
+
+            if (!reportYear || reportYear < 1900 || reportYear > 2100) {
+                alert('Please enter a valid report year');
+                return;
+            }
+
+            closeModal();
+
+            try {
+                const res = await fetch(`${API_URL}/reports/${docId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'approved',
+                        report_type: reportType,
+                        company_name: companyName,
+                        report_year: reportYear,
+                        description: `Approved for ${companyName} - ${reportType} (${reportYear})`
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    let message = `Document approved successfully for ${companyName} (${reportYear})!`;
+
+                    if (data.warning) {
+                        message += `\n\n⚠️ ${data.warning}`;
+                    } else {
+                        message += `\n\n✅ Company and annual report have been added to the Companies tab.`;
+                    }
+
+                    alert(message);
+                    fetchDocuments();
+                    fetchComplianceDocs();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Approval failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error');
+            }
+        }
+
+        async function handleRejectDocument(doc) {
+            // Show custom rejection dialog
+            const modal = document.getElementById('user-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalFooter = document.getElementById('modal-footer');
+
+            modalTitle.textContent = 'Reject Document';
+
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="background: #fef2f2; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #dc2626; margin-bottom: 1rem;">
+                        <div style="font-weight: 600; color: #991b1b; margin-bottom: 0.25rem;">Document:</div>
+                        <div style="color: #7f1d1d;">${doc.title}</div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                            Reason for Rejection: <span style="color: #dc2626;">*</span>
+                        </label>
+                        <textarea id="reject-reason" rows="4" placeholder="Please provide a detailed reason for rejecting this document..."
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.75rem;">
+                        <strong>Note:</strong> The submitter will be notified of this rejection and the reason provided.
+                    </p>
+                </div>
+            `;
+
+            modalFooter.innerHTML = `
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" style="background: #dc2626;" onclick="confirmRejection(${doc.id})">Confirm Rejection</button>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        async function confirmRejection(docId) {
+            const rejectionReason = document.getElementById('reject-reason').value.trim();
+
+            if (!rejectionReason) {
+                alert('Please provide a reason for rejection');
+                return;
+            }
+
+            closeModal();
+
+            try {
+                const res = await fetch(`${API_URL}/reports/${docId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'rejected',
+                        description: `Rejected: ${rejectionReason}`
+                    })
+                });
+
+                if (res.ok) {
+                    alert('Document rejected successfully!');
+                    fetchDocuments();
+                    fetchComplianceDocs();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Rejection failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error');
+            }
+        }
+
+
         // --- COMPANY-BASED COMPLIANCE FILTERING ---
-        let allCompaniesData = [];
+
 
         // Populate company dropdown when compliance tab is opened
         async function populateComplianceCompanyFilter() {
@@ -1052,7 +1782,79 @@
             }
         }
 
-        let allAccessUsers = []; // Store all users for filtering
+
+        async function fetchUsers() {
+            try {
+                const res = await fetch(`${API_URL}/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // Transform user data to match the access control table format
+                    const users = data.users.map(user => ({
+                        name: user.first_name && user.last_name
+                            ? `${user.first_name} ${user.last_name}`
+                            : user.username,
+                        role: user.role.charAt(0).toUpperCase() + user.role.slice(1),
+                        permissions: getPermissionsForRole(user.role),
+                        last_access: formatLastAccess(user.created_at), // Using created_at as proxy
+                        status: 'Active' // All users active by default
+                    }));
+
+                    renderAccessTable(users);
+                } else {
+                    console.error('Failed to fetch users:', await res.json());
+                    // Show empty state with error message
+                    document.getElementById('access-table-body').innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2rem; color: #ef4444;">
+                                <div style="font-size: 1rem;">Failed to load users</div>
+                                <div style="font-size: 0.875rem; margin-top: 0.5rem;">Please check your permissions</div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                console.error('Error fetching users:', err);
+                document.getElementById('access-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #ef4444;">
+                            <div style="font-size: 1rem;">Network error</div>
+                            <div style="font-size: 0.875rem; margin-top: 0.5rem;">Could not connect to the server</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function getPermissionsForRole(role) {
+            const permissions = {
+                'admin': 'Full Access, User Management, Report Review',
+                'user': 'Read/Write, Document Upload',
+                'viewer': 'Read Only'
+            };
+            return permissions[role] || 'Standard Access';
+        }
+
+        function formatLastAccess(lastLogin) {
+            if (!lastLogin) return 'Never';
+
+            const date = new Date(lastLogin);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+
+            return date.toLocaleDateString();
+        }
 
         function renderAccessTable(users) {
             allAccessUsers = users; // Store for filtering
@@ -1200,6 +2002,62 @@
             }, 100);
             // In a real app, you would call an API here to update the user status
             // await fetch(`${API_URL}/users/${user.id}/approve`, { method: 'POST', ... });
+        }
+
+        let complianceChartInstance = null;
+
+        function renderComplianceChart(companies) {
+            const ctx = document.getElementById('complianceChart').getContext('2d');
+
+            // Calculate current average
+            const currentAvg = Math.round(companies.reduce((acc, c) => acc + c.average_compliance, 0) / companies.length) || 0;
+
+            // Simulate 6-month history converging to current score
+            const history = [];
+            for (let i = 5; i >= 0; i--) {
+                // Random fluctuation that stabilizes towards the end
+                const fluctuation = Math.random() * (i * 2) - i;
+                history.push(Math.min(100, Math.max(0, Math.round(currentAvg - (i * 1.5) + fluctuation))));
+            }
+            // Ensure last point is exactly current
+            history[5] = currentAvg;
+
+            const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
+
+            if (complianceChartInstance) {
+                complianceChartInstance.destroy();
+            }
+
+            complianceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Compliance Score',
+                        data: history,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { borderDash: [2, 2] }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
         }
 
         function updateMetric(id, data) {
