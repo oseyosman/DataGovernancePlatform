@@ -148,6 +148,8 @@ def update_report(report_id):
         
         data = request.get_json()
         
+        warning_message = None
+        
         # Handle approval workflow
         if 'status' in data and data['status'] == 'approved':
             # Extract company name and year from the request
