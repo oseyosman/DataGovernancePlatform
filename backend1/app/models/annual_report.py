@@ -25,6 +25,7 @@ class AnnualReport(db.Model):
     
     # Metadata
     filing_date = db.Column(db.Date, nullable=True)
+    compliance_keywords = db.Column(db.JSON, nullable=True)  # Store found keywords (e.g., {'ISO 27001': True})
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

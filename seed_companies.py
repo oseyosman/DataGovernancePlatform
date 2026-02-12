@@ -170,8 +170,28 @@ def populate_companies(target_count=30):
             recent_reports = sorted_reports[:3]
             
             reports_added = 0
+            
+            # Initialize parser
+            from backend1.app.services.parser import parser
+            
             for report_data in recent_reports:
                 if report_data.get('year'):
+                    # Parse PDF for keywords
+                    keywords = {}
+                    if report_data.get('pdf_url'):
+                        try:
+                            print(f"     Scanning PDF: {report_data['pdf_url']}...")
+                            # Only scan if it's a direct PDF link or we can resolve it
+                            # For demo purposes, we might just scan a few to avoid long waits
+                            if 'pdf' in report_data['pdf_url'].lower():
+                                keywords = parser.analyze_pdf_url(report_data['pdf_url'])
+                                if keywords:
+                                    found_keys = [k for k, v in keywords.items() if v]
+                                    if found_keys:
+                                        print(f"       [MATCH] Found keywords: {', '.join(found_keys)}")
+                        except Exception as e:
+                            print(f"       [WARN] Could not parse PDF: {str(e)[:50]}")
+                    
                     annual_report = AnnualReport(
                         company_id=company.id,
                         year=report_data['year'],
@@ -179,7 +199,8 @@ def populate_companies(target_count=30):
                         report_type=report_data.get('report_type', 'Annual Report'),
                         pdf_url=report_data.get('pdf_url'),
                         html_url=report_data.get('html_url'),
-                        view_url=report_data.get('view_url')
+                        view_url=report_data.get('view_url'),
+                        compliance_keywords=keywords
                     )
                     db.session.add(annual_report)
                     reports_added += 1

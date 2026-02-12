@@ -36,19 +36,20 @@ class ComplianceAnalyzer:
     def __init__(self):
         self.cache = {}
     
-    def analyze_company(self, company_data, annual_reports):
+    def analyze_company(self, company_data, annual_reports, compliance_keywords=None):
         """
         Generate compliance scores using intelligent analysis
         
         Args:
             company_data: Dict with company info (name, ticker, industry, description)
             annual_reports: List of annual report dicts
+            compliance_keywords: Optional dict of found keywords (e.g., {'ISO 27001': True})
             
         Returns:
             Dict with compliance scores for all frameworks
         """
         # Create cache key
-        cache_key = f"{company_data.get('id')}_{len(annual_reports)}"
+        cache_key = f"{company_data.get('id')}_{len(annual_reports)}_{str(compliance_keywords)}"
         if cache_key in self.cache:
             return self.cache[cache_key]
         
@@ -65,14 +66,20 @@ class ComplianceAnalyzer:
         # Calculate compliance scores
         scores = {}
         
+        # KEYWORD BOOSTING LOGIC
+        # If we found explicit keywords in the reports, boost scores significantly
+        iso27001_boost = 1.15 if compliance_keywords and compliance_keywords.get('ISO 27001') else 1.0
+        iso27017_boost = 1.15 if compliance_keywords and compliance_keywords.get('ISO 27017') else 1.0
+        soc2_boost = 1.15 if compliance_keywords and compliance_keywords.get('SOC 2') else 1.0
+        
         # ISO 27001 Controls (with company-specific variance)
         iso27001_base = self._calculate_iso27001(
             baseline['iso27001'], company_size, report_quality, maturity_level
         )
         scores['iso27001'] = {
-            'access_control': max(50, min(98, iso27001_base['access_control'] + variance)),
-            'information_security': max(50, min(96, iso27001_base['information_security'] + variance - 1)),
-            'operations_security': max(50, min(94, iso27001_base['operations_security'] + variance + 1))
+            'access_control': max(50, min(100, int((iso27001_base['access_control'] + variance) * iso27001_boost))),
+            'information_security': max(50, min(100, int((iso27001_base['information_security'] + variance - 1) * iso27001_boost))),
+            'operations_security': max(50, min(100, int((iso27001_base['operations_security'] + variance + 1) * iso27001_boost)))
         }
         
         # ISO/IEC 27017 Cloud Controls (with variance)
@@ -80,9 +87,9 @@ class ComplianceAnalyzer:
             baseline['iso27017'], company_size, report_quality, maturity_level
         )
         scores['iso27017'] = {
-            'cloud_access_control': max(50, min(97, iso27017_base['cloud_access_control'] + variance + 2)),
-            'virtual_network_security': max(50, min(95, iso27017_base['virtual_network_security'] + variance)),
-            'cloud_asset_management': max(50, min(92, iso27017_base['cloud_asset_management'] + variance - 2))
+            'cloud_access_control': max(50, min(100, int((iso27017_base['cloud_access_control'] + variance + 2) * iso27017_boost))),
+            'virtual_network_security': max(50, min(100, int((iso27017_base['virtual_network_security'] + variance) * iso27017_boost))),
+            'cloud_asset_management': max(50, min(100, int((iso27017_base['cloud_asset_management'] + variance - 2) * iso27017_boost)))
         }
         
         # SOC 2 Trust Service Criteria (with variance)
@@ -90,21 +97,30 @@ class ComplianceAnalyzer:
             baseline['soc2'], company_size, report_quality, maturity_level, industry
         )
         scores['soc2'] = {
-            'security': max(50, min(98, soc2_base['security'] + variance + 1)),
-            'availability': max(50, min(96, soc2_base['availability'] + variance)),
-            'processing_integrity': max(50, min(94, soc2_base['processing_integrity'] + variance - 1)),
-            'confidentiality': max(50, min(92, soc2_base['confidentiality'] + variance - 2)),
-            'privacy': max(50, min(99, soc2_base['privacy'] + variance + 2))
+            'security': max(50, min(100, int((soc2_base['security'] + variance + 1) * soc2_boost))),
+            'availability': max(50, min(100, int((soc2_base['availability'] + variance) * soc2_boost))),
+            'processing_integrity': max(50, min(100, int((soc2_base['processing_integrity'] + variance - 1) * soc2_boost))),
+            'confidentiality': max(50, min(100, int((soc2_base['confidentiality'] + variance - 2) * soc2_boost))),
+            'privacy': max(50, min(100, int((soc2_base['privacy'] + variance + 2) * soc2_boost)))
         }
         
         # Policies (with variance)
         policies_base = self._calculate_policies(
             baseline['iso27001'], report_quality
         )
+        
+        # Boost policies if specific policy keywords found
+        policy_boost = 1.0
+        if compliance_keywords:
+            if compliance_keywords.get('GDPR') or compliance_keywords.get('CCPA'):
+                policy_boost = 1.1
+            if compliance_keywords.get('Clawback Policy'):
+                policy_boost = 1.2  # High boost for specific clawback policy
+        
         scores['policies'] = {
-            'privacy_policy': max(50, min(99, policies_base['privacy_policy'] + variance + 3)),
-            'security_policy': max(50, min(97, policies_base['security_policy'] + variance + 1)),
-            'data_handling_policy': max(50, min(95, policies_base['data_handling_policy'] + variance))
+            'privacy_policy': max(50, min(100, int((policies_base['privacy_policy'] + variance + 3) * policy_boost))),
+            'security_policy': max(50, min(100, int((policies_base['security_policy'] + variance + 1) * policy_boost))),
+            'data_handling_policy': max(50, min(100, int((policies_base['data_handling_policy'] + variance) * policy_boost)))
         }
         
         # Cache results

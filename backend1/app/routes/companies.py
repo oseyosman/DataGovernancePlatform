@@ -272,9 +272,17 @@ def get_company_compliance(company_id):
             'title': r.title
         } for r in reports]
         
+        # Aggregate keywords from all reports
+        all_keywords = {}
+        for r in reports:
+            if r.compliance_keywords:
+                for key, value in r.compliance_keywords.items():
+                    if value:
+                        all_keywords[key] = True
+        
         # Analyze and generate compliance scores
         analyzer = ComplianceAnalyzer()
-        scores = analyzer.analyze_company(company_data, report_data)
+        scores = analyzer.analyze_company(company_data, report_data, compliance_keywords=all_keywords)
         
         return jsonify({
             'company_id': company_id,
@@ -283,6 +291,7 @@ def get_company_compliance(company_id):
             'report_count': len(reports),
             'recent_reports': len([r for r in reports if r.year >= datetime.now().year - 2]),
             'compliance_scores': scores,
+            'compliance_keywords': all_keywords,
             'analysis_method': 'AI-Powered Industry Benchmark Analysis',
             'last_updated': datetime.utcnow().isoformat()
         }), 200
@@ -327,8 +336,16 @@ def get_all_companies_compliance():
                 'title': r.title
             } for r in reports]
             
+            # Aggregate keywords
+            all_keywords = {}
+            for r in reports:
+                if r.compliance_keywords:
+                    for key, value in r.compliance_keywords.items():
+                        if value:
+                            all_keywords[key] = True
+            
             # Analyze
-            scores = analyzer.analyze_company(company_data, report_data)
+            scores = analyzer.analyze_company(company_data, report_data, compliance_keywords=all_keywords)
             
             # Calculate average compliance score
             all_scores = []
@@ -345,7 +362,8 @@ def get_all_companies_compliance():
                 'industry': company.industry or 'Unknown',
                 'report_count': len(reports),
                 'compliance_scores': scores,
-                'average_compliance': average_score
+                'average_compliance': average_score,
+                'keywords_found': list(all_keywords.keys())
             })
         
         # Sort by average compliance (highest first)
