@@ -28,12 +28,12 @@ def clean_existing_bad_companies():
         db.session.commit()
 
 
-def populate_companies(target_count=20):
+def populate_companies(target_count=30):
     """
     Populate database with real company data from AnnualReports.com
     
     Args:
-        target_count: Number of companies to add (default: 20)
+        target_count: Number of companies to add (default: 30)
     """
     app = create_app()
     ctx = app.app_context()
@@ -51,6 +51,9 @@ def populate_companies(target_count=20):
         'tesla-inc',
         'meta-platforms-inc',
         'cisco-systems-inc',
+        'nvidia-corporation',
+        'microsoft-corp',
+        'amazon-com-inc',
         
         # Financial Services
         'paypal-holdings-inc',
@@ -67,6 +70,9 @@ def populate_companies(target_count=20):
         'pepsico-inc',
         'procter-gamble-co',
         'johnson-johnson',
+        'costco-wholesale-corporation',
+        'the-home-depot-inc',
+        'the-coca-cola-company',
         
         # Pharmaceuticals
         'pfizer-inc',
@@ -79,6 +85,10 @@ def populate_companies(target_count=20):
         
         # Technology Hardware
         'dell-technologies-inc',
+        'advanced-micro-devices-inc',
+        'intel-corporation',
+        'qualcomm-incorporated',
+        'broadcom-inc',
     ]
     
     current_count = Company.query.count()
@@ -239,7 +249,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='Populate companies database')
     parser.add_argument('--list', action='store_true', help='List existing companies')
-    parser.add_argument('--count', type=int, default=20, help='Target number of companies (default: 20)')
+    parser.add_argument('--count', type=int, default=30, help='Target number of companies (default: 30)')
     
     args = parser.parse_args()
     
