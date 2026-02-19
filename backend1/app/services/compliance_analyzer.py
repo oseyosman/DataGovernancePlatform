@@ -16,14 +16,14 @@ class ComplianceAnalyzer:
     
     # Industry baseline scores (based on real-world compliance data)
     INDUSTRY_BASELINES = {
-        'Technology': {'iso27001': 85, 'nist_csf': 87, 'soc2': 90},
-        'Financial Services': {'iso27001': 92, 'nist_csf': 90, 'soc2': 95},
-        'Healthcare': {'iso27001': 88, 'nist_csf': 84, 'soc2': 93},
-        'Retail': {'iso27001': 75, 'nist_csf': 72, 'soc2': 80},
-        'Manufacturing': {'iso27001': 72, 'nist_csf': 70, 'soc2': 75},
-        'Energy': {'iso27001': 80, 'nist_csf': 78, 'soc2': 82},
-        'Telecommunications': {'iso27001': 82, 'nist_csf': 83, 'soc2': 85},
-        'default': {'iso27001': 75, 'nist_csf': 73, 'soc2': 78}
+        'Technology': {'iso27001': 85, 'nist_csf': 87, 'soc2': 90, 'coso': 82},
+        'Financial Services': {'iso27001': 92, 'nist_csf': 90, 'soc2': 95, 'coso': 93},
+        'Healthcare': {'iso27001': 88, 'nist_csf': 84, 'soc2': 93, 'coso': 88},
+        'Retail': {'iso27001': 75, 'nist_csf': 72, 'soc2': 80, 'coso': 76},
+        'Manufacturing': {'iso27001': 72, 'nist_csf': 70, 'soc2': 75, 'coso': 74},
+        'Energy': {'iso27001': 80, 'nist_csf': 78, 'soc2': 82, 'coso': 80},
+        'Telecommunications': {'iso27001': 82, 'nist_csf': 83, 'soc2': 85, 'coso': 81},
+        'default': {'iso27001': 75, 'nist_csf': 73, 'soc2': 78, 'coso': 75}
     }
     
     # Company size factors (based on ticker presence, reports)
@@ -71,6 +71,13 @@ class ComplianceAnalyzer:
         iso27001_boost = 1.15 if compliance_keywords and compliance_keywords.get('ISO 27001') else 1.0
         nist_csf_boost = 1.15 if compliance_keywords and compliance_keywords.get('NIST CSF') else 1.0
         soc2_boost = 1.15 if compliance_keywords and compliance_keywords.get('SOC 2') else 1.0
+        coso_boost = 1.0
+        if compliance_keywords:
+            # COSO keywords from scraping: monitoring, risk assessment, internal control
+            if compliance_keywords.get('COSO'):
+                coso_boost = 1.15
+            elif compliance_keywords.get('Clawback Policy') or compliance_keywords.get('GDPR'):
+                coso_boost = 1.08  # Related governance keywords partially boost COSO
         
         # ISO 27001 Controls (with company-specific variance)
         iso27001_base = self._calculate_iso27001(
@@ -104,6 +111,16 @@ class ComplianceAnalyzer:
             'processing_integrity': max(50, min(100, int((soc2_base['processing_integrity'] + variance - 1) * soc2_boost))),
             'confidentiality': max(50, min(100, int((soc2_base['confidentiality'] + variance - 2) * soc2_boost))),
             'privacy': max(50, min(100, int((soc2_base['privacy'] + variance + 2) * soc2_boost)))
+        }
+        
+        # COSO Internal Control Framework (with variance)
+        coso_base = self._calculate_coso(
+            baseline['coso'], company_size, report_quality, maturity_level, industry
+        )
+        scores['coso'] = {
+            'monitoring_activities': max(50, min(100, int((coso_base['monitoring_activities'] + variance + 1) * coso_boost))),
+            'information_communication': max(50, min(100, int((coso_base['information_communication'] + variance) * coso_boost))),
+            'risk_assessment': max(50, min(100, int((coso_base['risk_assessment'] + variance - 1) * coso_boost)))
         }
         
         # Policies (with variance)
@@ -301,4 +318,31 @@ class ComplianceAnalyzer:
             'privacy_policy': min(int(base * report_quality * 1.05), 99),
             'security_policy': min(int(base * report_quality * 1.02), 97),
             'data_handling_policy': min(int(base * report_quality * 0.98), 95)
+        }
+    
+    def _calculate_coso(self, baseline, company_size, report_quality, maturity, industry):
+        """Calculate COSO Internal Control Framework scores
+        
+        COSO Components evaluated:
+        - Monitoring Activities: Ongoing evaluations, separate evaluations, reporting deficiencies
+        - Information & Communication: Internal/external communication, quality of information
+        - Risk Assessment: Risk identification, fraud risk, change management
+        """
+        multiplier = self.SIZE_MULTIPLIERS.get(company_size, 1.0)
+        
+        # Financial Services and Healthcare have stronger internal controls
+        industry_boost = 1.0
+        if industry in ['Financial Services']:
+            industry_boost = 1.08
+        elif industry in ['Healthcare', 'Energy']:
+            industry_boost = 1.04
+        
+        monitoring = int(baseline * multiplier * report_quality * industry_boost * 1.01)
+        info_comm = int(baseline * multiplier * maturity * industry_boost * 0.99)
+        risk_assess = int(baseline * multiplier * report_quality * industry_boost * 0.97)
+        
+        return {
+            'monitoring_activities': min(monitoring, 97),
+            'information_communication': min(info_comm, 95),
+            'risk_assessment': min(risk_assess, 93)
         }

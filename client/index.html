@@ -82,7 +82,7 @@
                 <div class="logo-icon">🛡️</div>
                 <div class="header-title">
                     <h1>Data Governance & Compliance Platform</h1>
-                    <div class="header-subtitle">ISO 27001 / NIST CSF / SOC 2</div>
+                    <div class="header-subtitle">ISO 27001 / NIST CSF / SOC 2 / COSO</div>
                 </div>
             </div>
             <div class="user-controls">
@@ -206,7 +206,7 @@
             <div id="tab-compliance" class="tab-content hidden">
                 <div class="card">
                     <h3>Compliance Controls</h3>
-                    <p style="color: #666; font-size: 0.9rem;">ISO 27001, NIST CSF, and SOC 2 Type II compliance
+                    <p style="color: #666; font-size: 0.9rem;">ISO 27001, NIST CSF, SOC 2 Type II, and COSO compliance
                         monitoring</p>
 
                     <!-- Company Filter -->
@@ -244,6 +244,12 @@
                         </div>
 
                         <!-- Column 4 -->
+                        <div class="control-group">
+                            <h4>COSO Internal Controls</h4>
+                            <div id="coso-list"></div>
+                        </div>
+
+                        <!-- Column 5 -->
                         <div class="control-group">
                             <h4>Policy Acknowledgments</h4>
                             <div id="policy-list"></div>
@@ -1766,6 +1772,7 @@
             const iso27001List = document.getElementById('iso27001-list');
             const nistcsfList = document.getElementById('nistcsf-list');
             const soc2List = document.getElementById('soc2-list');
+            const cosoList = document.getElementById('coso-list');
             const policyList = document.getElementById('policy-list');
 
             // Default overview values (could be calculated from all companies)
@@ -1789,6 +1796,12 @@
                 <div class="control-item"><span>Processing Integrity</span><span class="badge badge-success">86%</span></div>
                 <div class="control-item"><span>Confidentiality</span><span class="badge badge-warning">78%</span></div>
                 <div class="control-item"><span>Privacy</span><span class="badge badge-success">93%</span></div>
+            `;
+
+            cosoList.innerHTML = `
+                <div class="control-item"><span>Monitoring Activities</span><span class="badge badge-success">85%</span></div>
+                <div class="control-item"><span>Information & Communication</span><span class="badge badge-success">80%</span></div>
+                <div class="control-item"><span>Risk Assessment</span><span class="badge badge-warning">77%</span></div>
             `;
 
             policyList.innerHTML = `
@@ -1860,6 +1873,7 @@
                     const iso27001List = document.getElementById('iso27001-list');
                     const nistcsfList = document.getElementById('nistcsf-list');
                     const soc2List = document.getElementById('soc2-list');
+                    const cosoList = document.getElementById('coso-list');
                     const policyList = document.getElementById('policy-list');
 
                     // ISO 27001 Controls
@@ -1891,6 +1905,14 @@
                         <div class="control-item"><span>Processing Integrity</span><span class="badge ${getBadgeClass(soc2.processing_integrity)}">${soc2.processing_integrity}%</span></div>
                         <div class="control-item"><span>Confidentiality</span><span class="badge ${getBadgeClass(soc2.confidentiality)}">${soc2.confidentiality}%</span></div>
                         <div class="control-item"><span>Privacy</span><span class="badge ${getBadgeClass(soc2.privacy)}">${soc2.privacy}%</span></div>
+                    `;
+
+                    // COSO Internal Controls
+                    const coso = scores.coso;
+                    cosoList.innerHTML = `
+                        <div class="control-item"><span>Monitoring Activities</span><span class="badge ${getBadgeClass(coso.monitoring_activities)}">${coso.monitoring_activities}%</span></div>
+                        <div class="control-item"><span>Information & Communication</span><span class="badge ${getBadgeClass(coso.information_communication)}">${coso.information_communication}%</span></div>
+                        <div class="control-item"><span>Risk Assessment</span><span class="badge ${getBadgeClass(coso.risk_assessment)}">${coso.risk_assessment}%</span></div>
                     `;
 
                     // Policies
@@ -1942,6 +1964,7 @@
             if (data.compliance_details) {
                 renderComplianceList('iso27001-list', data.compliance_details.iso_27001);
                 renderComplianceList('nistcsf-list', data.compliance_details.nist_csf);
+                renderComplianceList('coso-list', data.compliance_details.coso);
                 renderPolicyList('policy-list', data.compliance_details.policies);
             }
 
@@ -2432,7 +2455,10 @@
                 'NIST CSF — Recover': [],
                 'SOC 2 — Availability': [],
                 'SOC 2 — Confidentiality': [],
-                'SOC 2 — Processing Integrity': []
+                'SOC 2 — Processing Integrity': [],
+                'COSO — Monitoring Activities': [],
+                'COSO — Information & Communication': [],
+                'COSO — Risk Assessment': []
             };
             const keyMap = {
                 'ISO 27001 — Information Security': c => c.compliance_scores?.iso27001?.information_security,
@@ -2445,7 +2471,10 @@
                 'NIST CSF — Recover': c => c.compliance_scores?.nist_csf?.recover,
                 'SOC 2 — Availability': c => c.compliance_scores?.soc2?.availability,
                 'SOC 2 — Confidentiality': c => c.compliance_scores?.soc2?.confidentiality,
-                'SOC 2 — Processing Integrity': c => c.compliance_scores?.soc2?.processing_integrity
+                'SOC 2 — Processing Integrity': c => c.compliance_scores?.soc2?.processing_integrity,
+                'COSO — Monitoring Activities': c => c.compliance_scores?.coso?.monitoring_activities,
+                'COSO — Information & Communication': c => c.compliance_scores?.coso?.information_communication,
+                'COSO — Risk Assessment': c => c.compliance_scores?.coso?.risk_assessment
             };
             for (const [name, getter] of Object.entries(keyMap)) {
                 companies.forEach(c => { const v = getter(c); if (v !== undefined) frameworks[name].push(v); });

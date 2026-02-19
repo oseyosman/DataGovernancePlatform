@@ -352,6 +352,7 @@ def get_all_companies_compliance():
             all_scores.extend(scores['iso27001'].values())
             all_scores.extend(scores['nist_csf'].values())
             all_scores.extend(scores['soc2'].values())
+            all_scores.extend(scores['coso'].values())
             
             average_score = int(sum(all_scores) / len(all_scores))
             

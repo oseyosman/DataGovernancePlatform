@@ -56,6 +56,11 @@ def get_overview():
                     {'name': 'Respond', 'score': 82, 'status': 'good'},
                     {'name': 'Recover', 'score': 72, 'status': 'warning'}
                 ],
+                'coso': [
+                    {'name': 'Monitoring Activities', 'score': 85, 'status': 'good'},
+                    {'name': 'Information & Communication', 'score': 80, 'status': 'good'},
+                    {'name': 'Risk Assessment', 'score': 77, 'status': 'warning'}
+                ],
                 'policies': [
                     {'name': 'Privacy Policy', 'completion': 95},
                     {'name': 'Security Policy', 'completion': 88},

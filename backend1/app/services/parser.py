@@ -23,6 +23,7 @@ class ComplianceParser:
         'ISO 27001': ['iso 27001', 'iso/iec 27001', '27001 certified'],
         'NIST CSF': ['nist csf', 'nist cybersecurity framework', 'cybersecurity framework', 'nist sp 800'],
         'SOC 2': ['soc 2', 'soc2', 'service organization control 2'],
+        'COSO': ['coso', 'internal control framework', 'committee of sponsoring organizations', 'monitoring activities', 'coso framework'],
         'Clawback Policy': ['clawback', 'recovery of erroneously awarded compensation', 'erroneously awarded compensation'],
         'GDPR': ['gdpr', 'general data protection regulation'],
         'CCPA': ['ccpa', 'california consumer privacy act'],
