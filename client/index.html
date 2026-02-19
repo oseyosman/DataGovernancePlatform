@@ -26,11 +26,11 @@
             <form onsubmit="handleLogin(event)">
                 <div>
                     <label>Username</label>
-                    <input type="text" id="username" placeholder="admin" required>
+                    <input type="text" id="username" placeholder="Enter username" required>
                 </div>
                 <div>
                     <label>Password</label>
-                    <input type="password" id="password" placeholder="admin123" required>
+                    <input type="password" id="password" placeholder="Enter password" required>
                 </div>
                 <button type="submit" class="btn-primary btn-full">Login to Platform</button>
             </form>
@@ -86,8 +86,10 @@
                 </div>
             </div>
             <div class="user-controls">
-                <button class="btn-outline">
-                    <span id="system-status">System Active</span>
+                <button class="btn-outline" onclick="checkSystemHealth()" title="Click to check system status">
+                    <span id="system-dot"
+                        style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; margin-right: 6px;"></span>
+                    <span id="system-status">Checking...</span>
                 </button>
                 <div id="user-display" style="font-weight: 500;"></div>
                 <button onclick="logout()" class="btn-primary" style="font-size: 0.875rem;">Logout</button>
@@ -486,6 +488,7 @@
                                         style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
                                         <option value="policy">Policy Document</option>
                                         <option value="audit">Audit Report</option>
+                                        <option value="annual_report">Annual Report</option>
                                         <option value="evidence">Compliance Evidence</option>
                                     </select>
                                 </div>
@@ -710,6 +713,38 @@
         const API_URL = 'http://localhost:5000/api';
         let token = localStorage.getItem('token');
         let charts = {};
+        let healthCheckInterval = null;
+
+        // System Health Check — pings /health every 30s
+        async function checkSystemHealth() {
+            const dot = document.getElementById('system-dot');
+            const label = document.getElementById('system-status');
+            try {
+                const res = await fetch('http://localhost:5000/health', { method: 'GET' });
+                if (res.ok) {
+                    const data = await res.json();
+                    dot.style.background = '#10b981';
+                    label.textContent = 'System Active';
+                    label.title = `DB: ${data.database} | Uptime: running`;
+                } else {
+                    dot.style.background = '#ef4444';
+                    label.textContent = 'System Error';
+                }
+            } catch {
+                dot.style.background = '#ef4444';
+                label.textContent = 'System Offline';
+            }
+        }
+
+        function startHealthCheck() {
+            checkSystemHealth();
+            if (healthCheckInterval) clearInterval(healthCheckInterval);
+            healthCheckInterval = setInterval(checkSystemHealth, 30000);
+        }
+
+        function stopHealthCheck() {
+            if (healthCheckInterval) { clearInterval(healthCheckInterval); healthCheckInterval = null; }
+        }
 
         if (token) checkAuth();
 
@@ -721,6 +756,7 @@
                 if (res.ok) {
                     const user = await res.json();
                     initDashboard(user);
+                    startHealthCheck();
                 } else {
                     logout();
                 }
@@ -744,6 +780,7 @@
                     token = data.access_token;
                     localStorage.setItem('token', token);
                     initDashboard(data.user);
+                    startHealthCheck();
                 } else {
                     document.getElementById('login-error').textContent = data.error;
                     document.getElementById('login-error').classList.remove('hidden');
@@ -754,6 +791,7 @@
         }
 
         function logout() {
+            stopHealthCheck();
             localStorage.removeItem('token');
             location.reload();
         }
@@ -1146,6 +1184,10 @@
                                     `<a href="${annualReportsUrl}" target="_blank" class="btn-sm" style="background: #2563eb; color: white; text-decoration: none; border: none; font-size: 0.75rem;" title="View on AnnualReports.com${companyTicker ? ' - ' + companyTicker : ''}">📄 View Report</a>` :
                                     ''
                                 }
+                                    ${doc.status === 'approved' && hasFile ?
+                                    `<a href="#" onclick="event.preventDefault(); downloadReport(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')" class="btn-sm" style="background: #10b981; color: white; text-decoration: none; border: none; font-size: 0.75rem;">⬇ Download</a>` :
+                                    ''
+                                }
                                     <span style="font-size: 0.75rem; color: #9ca3af; margin-left: auto;">
                                         ${new Date(doc.created_at).toLocaleDateString()}
                                     </span>
@@ -1219,15 +1261,22 @@
                                 <div>
                                     <h5 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">${doc.title}</h5>
                                     <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 0.5rem;">${doc.description || 'No description'}</p>
-                                    <div style="display: flex; gap: 0.5rem;">
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
                                         <span class="badge badge-low">${doc.report_type}</span>
                                         <span class="badge badge-${doc.status === 'approved' ? 'success' : 'medium'}">${doc.status}</span>
+                                        ${doc.file_path ? '<span class="badge badge-success" style="font-size: 0.7rem;">📎 File</span>' : ''}
                                     </div>
                                 </div>
-                                ${doc.status === 'draft' ?
-                            `<button class="btn-sm btn-white" onclick="updateReportStatus(${doc.id}, 'submitted')">Submit</button>` :
-                            (doc.status === 'submitted' ? '<span style="color: #6b7280; font-size: 0.8rem;">Submitted</span>' : '')
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    ${doc.status === 'approved' && doc.file_path ?
+                            `<a href="${API_URL}/reports/download/${doc.id}" 
+                                            style="background: #10b981; color: white; padding: 0.35rem 0.75rem; border-radius: 0.375rem; font-size: 0.8rem; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;"
+                                            onclick="event.preventDefault(); downloadReport(${doc.id}, '${doc.title}')">⬇ Download</a>` :
+                            (doc.status === 'draft' ?
+                                `<button class="btn-sm btn-white" onclick="updateReportStatus(${doc.id}, 'submitted')">Submit</button>` :
+                                (doc.status === 'submitted' ? '<span style="color: #6b7280; font-size: 0.8rem;">Submitted</span>' : ''))
                         }
+                                </div>
                             </div>
                         </div>
                     `).join('');
@@ -1236,6 +1285,37 @@
                 }
             } catch (err) {
                 console.error(err);
+            }
+        }
+
+
+        async function downloadReport(reportId, title) {
+            try {
+                const res = await fetch(`${API_URL}/reports/download/${reportId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const disposition = res.headers.get('Content-Disposition');
+                    let filename = title || 'download';
+                    if (disposition && disposition.includes('filename=')) {
+                        filename = disposition.split('filename=')[1].replace(/"/g, '');
+                    }
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Download failed');
+                }
+            } catch (err) {
+                console.error('Download error:', err);
+                alert('Failed to download file');
             }
         }
 

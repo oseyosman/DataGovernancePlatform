@@ -299,6 +299,35 @@ def review_report(report_id):
         return jsonify({'error': 'Failed to review report.'}), 500
 
 
+@bp.route('/download/<int:report_id>', methods=['GET'])
+@jwt_required()
+def download_report(report_id):
+    """Download an uploaded file for an approved report"""
+    try:
+        report = Report.query.get(report_id)
+        if not report:
+            return jsonify({'error': 'Report not found'}), 404
+        
+        if report.status != 'approved':
+            return jsonify({'error': 'Only approved reports can be downloaded'}), 403
+        
+        if not report.file_path:
+            return jsonify({'error': 'No file attached to this report'}), 404
+        
+        # Build absolute file path
+        file_abs_path = os.path.join(current_app.root_path, 'static', report.file_path)
+        
+        if not os.path.exists(file_abs_path):
+            return jsonify({'error': 'File not found on server'}), 404
+        
+        from flask import send_file
+        filename = report.file_path.split('/')[-1]
+        return send_file(file_abs_path, as_attachment=True, download_name=filename)
+        
+    except Exception as e:
+        return jsonify({'error': 'Failed to download file.'}), 500
+
+
 @bp.route('/<int:report_id>', methods=['DELETE'])
 @jwt_required()
 def delete_report(report_id):
