@@ -27,10 +27,20 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     jwt.init_app(app)
     
-    # Enable CORS for all domains including file:// protocol (null origin)
+    # Enable CORS — restrict to known development origins
+    # In production, replace with your actual domain(s)
+    allowed_origins = [
+        "http://localhost:5000",
+        "http://localhost:5500",
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "http://127.0.0.1:5000",
+        "http://127.0.0.1:5500",
+        "null",  # file:// protocol sends 'null' as origin
+    ]
     CORS(app, resources={
         r"/api/*": {
-            "origins": "*",
+            "origins": allowed_origins,
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": False
@@ -39,6 +49,18 @@ def create_app(config_class=Config):
     
     # Disable strict slashes to prevent redirects that break CORS preflight
     app.url_map.strict_slashes = False
+    
+    # Security response headers
+    @app.after_request
+    def set_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;"
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        return response
     
     # Register blueprints
     from backend1.app.routes import auth_bp, dashboard_bp, admin_bp, reports_bp

@@ -21,7 +21,7 @@ class ComplianceParser:
     # Keywords to search for (case-insensitive)
     KEYWORDS = {
         'ISO 27001': ['iso 27001', 'iso/iec 27001', '27001 certified'],
-        'ISO 27017': ['iso 27017', 'iso/iec 27017', '27017 certified'],
+        'NIST CSF': ['nist csf', 'nist cybersecurity framework', 'cybersecurity framework', 'nist sp 800'],
         'SOC 2': ['soc 2', 'soc2', 'service organization control 2'],
         'Clawback Policy': ['clawback', 'recovery of erroneously awarded compensation', 'erroneously awarded compensation'],
         'GDPR': ['gdpr', 'general data protection regulation'],

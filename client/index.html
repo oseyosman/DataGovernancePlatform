@@ -82,7 +82,7 @@
                 <div class="logo-icon">🛡️</div>
                 <div class="header-title">
                     <h1>Data Governance & Compliance Platform</h1>
-                    <div class="header-subtitle">ISO 27001 / ISO/IEC 27017 / SOC 2</div>
+                    <div class="header-subtitle">ISO 27001 / NIST CSF / SOC 2</div>
                 </div>
             </div>
             <div class="user-controls">
@@ -206,7 +206,7 @@
             <div id="tab-compliance" class="tab-content hidden">
                 <div class="card">
                     <h3>Compliance Controls</h3>
-                    <p style="color: #666; font-size: 0.9rem;">ISO 27001, ISO/IEC 27017, and SOC 2 Type II compliance
+                    <p style="color: #666; font-size: 0.9rem;">ISO 27001, NIST CSF, and SOC 2 Type II compliance
                         monitoring</p>
 
                     <!-- Company Filter -->
@@ -233,8 +233,8 @@
 
                         <!-- Column 2 -->
                         <div class="control-group">
-                            <h4>ISO/IEC 27017 Cloud Controls</h4>
-                            <div id="iso27017-list"></div>
+                            <h4>NIST CSF Functions</h4>
+                            <div id="nistcsf-list"></div>
                         </div>
 
                         <!-- Column 3 -->
@@ -506,12 +506,175 @@
                 </div>
             </div>
 
-            <!-- TAB 5: SUMMARY (Placeholder) -->
+            <!-- TAB 5: EXECUTIVE SUMMARY -->
             <div id="tab-summary" class="tab-content hidden">
-                <div class="card" style="text-align: center; padding: 4rem;">
-                    <h3>Executive Summary</h3>
-                    <p>Report generation coming soon...</p>
+
+                <!-- Header Banner -->
+                <div
+                    style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%); border-radius: 16px; padding: 2.5rem; margin-bottom: 2rem; color: white; position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.05);">
+                    </div>
+                    <div
+                        style="position: absolute; bottom: -40px; left: -40px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.03);">
+                    </div>
+                    <div style="position: relative; z-index: 1;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.75rem; font-weight: 700;">📊 Executive
+                                    Summary Report</h2>
+                                <p style="margin: 0; opacity: 0.8; font-size: 0.95rem;">Data Governance & Compliance
+                                    Platform — Walsh College MSIT Capstone</p>
+                                <p style="margin: 0.5rem 0 0 0; opacity: 0.6; font-size: 0.85rem;"
+                                    id="summary-generated-at">Generated: Loading...</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 3rem; font-weight: 800; line-height: 1;"
+                                    id="summary-overall-score">--</div>
+                                <div style="font-size: 0.85rem; opacity: 0.7; margin-top: 0.25rem;">Overall Compliance
+                                    Score</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- KPI Cards Row -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="card" style="text-align: center; padding: 1.25rem;">
+                        <div
+                            style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Companies Monitored</div>
+                        <div style="font-size: 2.25rem; font-weight: 700; color: #1e40af; margin: 0.5rem 0;"
+                            id="summary-total-companies">--</div>
+                        <div style="font-size: 0.75rem; color: #10b981;">✔ Active monitoring</div>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 1.25rem;">
+                        <div
+                            style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Annual Reports</div>
+                        <div style="font-size: 2.25rem; font-weight: 700; color: #7c3aed; margin: 0.5rem 0;"
+                            id="summary-total-reports">--</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;" id="summary-avg-reports">Avg -- per company
+                        </div>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 1.25rem;">
+                        <div
+                            style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                            High Compliance</div>
+                        <div style="font-size: 2.25rem; font-weight: 700; color: #059669; margin: 0.5rem 0;"
+                            id="summary-high-compliance">--</div>
+                        <div style="font-size: 0.75rem; color: #059669;">Score ≥ 80%</div>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 1.25rem;">
+                        <div
+                            style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Needs Attention</div>
+                        <div style="font-size: 2.25rem; font-weight: 700; color: #dc2626; margin: 0.5rem 0;"
+                            id="summary-low-compliance">--</div>
+                        <div style="font-size: 0.75rem; color: #dc2626;">Score &lt; 70%</div>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 1.25rem;">
+                        <div
+                            style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Documents Reviewed</div>
+                        <div style="font-size: 2.25rem; font-weight: 700; color: #0891b2; margin: 0.5rem 0;"
+                            id="summary-docs-reviewed">--</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;" id="summary-docs-pending">-- pending</div>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 1.25rem;">
+                        <div
+                            style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Keywords Detected</div>
+                        <div style="font-size: 2.25rem; font-weight: 700; color: #d97706; margin: 0.5rem 0;"
+                            id="summary-keywords-count">--</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">Compliance indicators</div>
+                    </div>
+                </div>
+
+                <!-- Charts Row: Framework Breakdown + Risk Matrix -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Compliance by Framework -->
+                    <div class="card" style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.25rem 0; font-size: 1.1rem;">Compliance by Framework</h3>
+                        <p style="color: #6b7280; font-size: 0.8rem; margin: 0 0 1rem 0;">Average scores across all
+                            companies</p>
+                        <div id="summary-framework-bars">
+                            <!-- Dynamic bars -->
+                        </div>
+                    </div>
+
+                    <!-- Risk Distribution -->
+                    <div class="card" style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.25rem 0; font-size: 1.1rem;">Risk Distribution</h3>
+                        <p style="color: #6b7280; font-size: 0.8rem; margin: 0 0 1rem 0;">Companies grouped by
+                            compliance level</p>
+                        <div style="display: flex; justify-content: center; align-items: center; height: 200px;">
+                            <canvas id="summaryRiskChart" width="280" height="200"></canvas>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 0.75rem; font-size: 0.8rem;">
+                            <span><span
+                                    style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; margin-right: 4px;"></span>Low
+                                Risk</span>
+                            <span><span
+                                    style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; margin-right: 4px;"></span>Medium</span>
+                            <span><span
+                                    style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; margin-right: 4px;"></span>High
+                                Risk</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top & Bottom Companies -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Top 5 -->
+                    <div class="card" style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem;">🏆 Top 5 Companies</h3>
+                        <div id="summary-top-companies">
+                            <p style="color: #6b7280;">Loading...</p>
+                        </div>
+                    </div>
+                    <!-- Bottom 5 -->
+                    <div class="card" style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem;">⚠️ Bottom 5 — Needs Improvement</h3>
+                        <div id="summary-bottom-companies">
+                            <p style="color: #6b7280;">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Industry Compliance + Document Stats -->
+                <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="card" style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.25rem 0; font-size: 1.1rem;">Compliance by Industry Sector</h3>
+                        <p style="color: #6b7280; font-size: 0.8rem; margin: 0 0 1rem 0;">Average compliance score per
+                            industry</p>
+                        <div id="summary-industry-bars">
+                            <p style="color: #6b7280;">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="card" style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.25rem 0; font-size: 1.1rem;">Document Pipeline</h3>
+                        <p style="color: #6b7280; font-size: 0.8rem; margin: 0 0 1rem 0;">Report status breakdown</p>
+                        <div style="display: flex; justify-content: center; align-items: center; height: 200px;">
+                            <canvas id="summaryDocChart" width="250" height="200"></canvas>
+                        </div>
+                        <div id="summary-doc-legend"
+                            style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.75rem; font-size: 0.8rem; flex-wrap: wrap;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="card" style="padding: 1.5rem; border-left: 4px solid #3b82f6;">
+                    <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem;">📋 Key Recommendations</h3>
+                    <div id="summary-recommendations" style="display: grid; gap: 0.75rem;">
+                        <p style="color: #6b7280;">Generating recommendations...</p>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -852,6 +1015,8 @@
                 fetchComplianceDocs();
                 fetchUsers(); // Fetch users for the access control table
                 fetchAllDocuments(); // Fetch all uploaded documents
+            } else if (tabId === 'summary') {
+                loadExecutiveSummary();
             }
         }
 
@@ -1599,7 +1764,7 @@
         function displayOverviewCompliance() {
             // Calculate average compliance across all companies
             const iso27001List = document.getElementById('iso27001-list');
-            const iso27017List = document.getElementById('iso27017-list');
+            const nistcsfList = document.getElementById('nistcsf-list');
             const soc2List = document.getElementById('soc2-list');
             const policyList = document.getElementById('policy-list');
 
@@ -1610,10 +1775,12 @@
                 <div class="control-item"><span>Operations Security</span><span class="badge badge-warning">75%</span></div>
             `;
 
-            iso27017List.innerHTML = `
-                <div class="control-item"><span>Cloud Access Control</span><span class="badge badge-success">90%</span></div>
-                <div class="control-item"><span>Virtual Network Security</span><span class="badge badge-success">85%</span></div>
-                <div class="control-item"><span>Cloud Asset Management</span><span class="badge badge-warning">70%</span></div>
+            nistcsfList.innerHTML = `
+                <div class="control-item"><span>Identify</span><span class="badge badge-success">88%</span></div>
+                <div class="control-item"><span>Protect</span><span class="badge badge-success">85%</span></div>
+                <div class="control-item"><span>Detect</span><span class="badge badge-warning">78%</span></div>
+                <div class="control-item"><span>Respond</span><span class="badge badge-success">82%</span></div>
+                <div class="control-item"><span>Recover</span><span class="badge badge-warning">72%</span></div>
             `;
 
             soc2List.innerHTML = `
@@ -1691,7 +1858,7 @@
 
                     // Display company-specific compliance using AI-generated scores
                     const iso27001List = document.getElementById('iso27001-list');
-                    const iso27017List = document.getElementById('iso27017-list');
+                    const nistcsfList = document.getElementById('nistcsf-list');
                     const soc2List = document.getElementById('soc2-list');
                     const policyList = document.getElementById('policy-list');
 
@@ -1706,12 +1873,14 @@
                         </div>
                     `;
 
-                    // ISO/IEC 27017 Cloud Controls
-                    const cloud = scores.iso27017;
-                    iso27017List.innerHTML = `
-                        <div class="control-item"><span>Cloud Access Control</span><span class="badge ${getBadgeClass(cloud.cloud_access_control)}">${cloud.cloud_access_control}%</span></div>
-                        <div class="control-item"><span>Virtual Network Security</span><span class="badge ${getBadgeClass(cloud.virtual_network_security)}">${cloud.virtual_network_security}%</span></div>
-                        <div class="control-item"><span>Cloud Asset Management</span><span class="badge ${getBadgeClass(cloud.cloud_asset_management)}">${cloud.cloud_asset_management}%</span></div>
+                    // NIST CSF Functions
+                    const nistcsf = scores.nist_csf;
+                    nistcsfList.innerHTML = `
+                        <div class="control-item"><span>Identify</span><span class="badge ${getBadgeClass(nistcsf.identify)}">${nistcsf.identify}%</span></div>
+                        <div class="control-item"><span>Protect</span><span class="badge ${getBadgeClass(nistcsf.protect)}">${nistcsf.protect}%</span></div>
+                        <div class="control-item"><span>Detect</span><span class="badge ${getBadgeClass(nistcsf.detect)}">${nistcsf.detect}%</span></div>
+                        <div class="control-item"><span>Respond</span><span class="badge ${getBadgeClass(nistcsf.respond)}">${nistcsf.respond}%</span></div>
+                        <div class="control-item"><span>Recover</span><span class="badge ${getBadgeClass(nistcsf.recover)}">${nistcsf.recover}%</span></div>
                     `;
 
                     // SOC 2 Trust Service Criteria
@@ -1772,7 +1941,7 @@
             // --- COMPLIANCE TAB DATA ---
             if (data.compliance_details) {
                 renderComplianceList('iso27001-list', data.compliance_details.iso_27001);
-                renderComplianceList('iso27017-list', data.compliance_details.iso_27017);
+                renderComplianceList('nistcsf-list', data.compliance_details.nist_csf);
                 renderPolicyList('policy-list', data.compliance_details.policies);
             }
 
@@ -2170,6 +2339,274 @@
                         <div class="activity-time">${item.timestamp}</div>
                     </div>
                     <span class="badge badge-${item.priority}">${item.priority}</span>
+                </div>
+            `).join('');
+        }
+
+        // ========== EXECUTIVE SUMMARY ==========
+        async function loadExecutiveSummary() {
+            try {
+                // Fetch compliance overview + reports in parallel
+                const [compRes, repRes] = await Promise.all([
+                    fetch(`${API_URL}/companies/compliance-overview`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/reports/`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                const compData = compRes.ok ? await compRes.json() : { companies: [], total_companies: 0 };
+                const repData = repRes.ok ? await repRes.json() : { reports: [] };
+                const companies = compData.companies || [];
+                const reports = repData.reports || [];
+
+                // --- Timestamp ---
+                document.getElementById('summary-generated-at').textContent = `Generated: ${new Date().toLocaleString()}`;
+
+                // --- Overall compliance score ---
+                const overallScore = companies.length > 0
+                    ? Math.round(companies.reduce((s, c) => s + (c.average_compliance || 0), 0) / companies.length)
+                    : 0;
+                document.getElementById('summary-overall-score').textContent = `${overallScore}%`;
+
+                // --- KPI cards ---
+                const totalReports = companies.reduce((s, c) => s + (c.report_count || 0), 0);
+                document.getElementById('summary-total-companies').textContent = companies.length;
+                document.getElementById('summary-total-reports').textContent = totalReports;
+                document.getElementById('summary-avg-reports').textContent = `Avg ${companies.length > 0 ? (totalReports / companies.length).toFixed(1) : 0} per company`;
+
+                const highCount = companies.filter(c => (c.average_compliance || 0) >= 80).length;
+                const lowCount = companies.filter(c => (c.average_compliance || 0) < 70).length;
+                document.getElementById('summary-high-compliance').textContent = highCount;
+                document.getElementById('summary-low-compliance').textContent = lowCount;
+
+                const approvedDocs = reports.filter(r => r.status === 'approved').length;
+                const pendingDocs = reports.filter(r => r.status === 'submitted').length;
+                document.getElementById('summary-docs-reviewed').textContent = approvedDocs;
+                document.getElementById('summary-docs-pending').textContent = `${pendingDocs} pending`;
+
+                // Keywords count (sum all keyword detections)
+                let totalKeywords = 0;
+                companies.forEach(c => {
+                    if (c.compliance_scores) {
+                        Object.values(c.compliance_scores).forEach(framework => {
+                            if (typeof framework === 'object') {
+                                Object.values(framework).forEach(v => { if (v > 0) totalKeywords++; });
+                            }
+                        });
+                    }
+                });
+                document.getElementById('summary-keywords-count').textContent = totalKeywords;
+
+                // --- Framework Compliance Bars ---
+                renderFrameworkBars(companies);
+
+                // --- Risk Distribution Chart ---
+                renderRiskChart(companies);
+
+                // --- Top / Bottom 5 ---
+                renderTopBottomCompanies(companies);
+
+                // --- Industry bars ---
+                renderIndustryBars(companies);
+
+                // --- Document Pipeline Chart ---
+                renderDocPipeline(reports);
+
+                // --- Recommendations ---
+                renderRecommendations(companies, reports, overallScore, lowCount);
+
+            } catch (err) {
+                console.error('Error loading executive summary:', err);
+            }
+        }
+
+        function renderFrameworkBars(companies) {
+            if (!companies.length) return;
+            // Aggregate framework scores
+            const frameworks = {
+                'ISO 27001 — Information Security': [],
+                'ISO 27001 — Access Control': [],
+                'ISO 27001 — Operations Security': [],
+                'NIST CSF — Identify': [],
+                'NIST CSF — Protect': [],
+                'NIST CSF — Detect': [],
+                'NIST CSF — Respond': [],
+                'NIST CSF — Recover': [],
+                'SOC 2 — Availability': [],
+                'SOC 2 — Confidentiality': [],
+                'SOC 2 — Processing Integrity': []
+            };
+            const keyMap = {
+                'ISO 27001 — Information Security': c => c.compliance_scores?.iso27001?.information_security,
+                'ISO 27001 — Access Control': c => c.compliance_scores?.iso27001?.access_control,
+                'ISO 27001 — Operations Security': c => c.compliance_scores?.iso27001?.operations_security,
+                'NIST CSF — Identify': c => c.compliance_scores?.nist_csf?.identify,
+                'NIST CSF — Protect': c => c.compliance_scores?.nist_csf?.protect,
+                'NIST CSF — Detect': c => c.compliance_scores?.nist_csf?.detect,
+                'NIST CSF — Respond': c => c.compliance_scores?.nist_csf?.respond,
+                'NIST CSF — Recover': c => c.compliance_scores?.nist_csf?.recover,
+                'SOC 2 — Availability': c => c.compliance_scores?.soc2?.availability,
+                'SOC 2 — Confidentiality': c => c.compliance_scores?.soc2?.confidentiality,
+                'SOC 2 — Processing Integrity': c => c.compliance_scores?.soc2?.processing_integrity
+            };
+            for (const [name, getter] of Object.entries(keyMap)) {
+                companies.forEach(c => { const v = getter(c); if (v !== undefined) frameworks[name].push(v); });
+            }
+            const container = document.getElementById('summary-framework-bars');
+            const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#0ea5e9', '#06b6d4', '#10b981', '#14b8a6', '#f59e0b'];
+            container.innerHTML = Object.entries(frameworks).map(([name, vals], i) => {
+                const avg = vals.length > 0 ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+                const color = colors[i % colors.length];
+                const barColor = avg >= 80 ? '#10b981' : avg >= 60 ? '#f59e0b' : '#ef4444';
+                return `
+                    <div style="margin-bottom: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 0.82rem; color: #374151; font-weight: 500;">${name}</span>
+                            <span style="font-size: 0.82rem; font-weight: 700; color: ${barColor};">${avg}%</span>
+                        </div>
+                        <div style="height: 10px; background: #f3f4f6; border-radius: 6px; overflow: hidden;">
+                            <div style="height: 100%; width: ${avg}%; background: ${color}; border-radius: 6px; transition: width 0.6s ease;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRiskChart(companies) {
+            const lowRisk = companies.filter(c => (c.average_compliance || 0) >= 80).length;
+            const medRisk = companies.filter(c => (c.average_compliance || 0) >= 60 && (c.average_compliance || 0) < 80).length;
+            const highRisk = companies.filter(c => (c.average_compliance || 0) < 60).length;
+            const ctx = document.getElementById('summaryRiskChart');
+            if (ctx && typeof Chart !== 'undefined') {
+                if (charts.summaryRisk) charts.summaryRisk.destroy();
+                charts.summaryRisk = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Low Risk (≥80%)', 'Medium (60-79%)', 'High Risk (<60%)'],
+                        datasets: [{ data: [lowRisk, medRisk, highRisk], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '60%',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        function renderTopBottomCompanies(companies) {
+            const sorted = [...companies].sort((a, b) => (b.average_compliance || 0) - (a.average_compliance || 0));
+            const top5 = sorted.slice(0, 5);
+            const bottom5 = sorted.slice(-5).reverse();
+
+            const renderRow = (c, rank, isTop) => {
+                const score = Math.round(c.average_compliance || 0);
+                const color = score >= 80 ? '#059669' : score >= 60 ? '#d97706' : '#dc2626';
+                const bg = score >= 80 ? '#d1fae5' : score >= 60 ? '#fef3c7' : '#fee2e2';
+                const medal = isTop ? ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][rank] : '';
+                return `
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; border-radius: 8px; background: ${rank % 2 === 0 ? '#f9fafb' : 'white'}; margin-bottom: 4px;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span style="font-size: 1.1rem; width: 28px; text-align: center;">${medal || (rank + 1)}</span>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #111827;">${c.name || 'Unknown'}</div>
+                                <div style="font-size: 0.75rem; color: #6b7280;">${c.industry || 'N/A'} · ${c.report_count || 0} reports</div>
+                            </div>
+                        </div>
+                        <span style="font-weight: 700; padding: 2px 10px; border-radius: 12px; font-size: 0.85rem; background: ${bg}; color: ${color};">${score}%</span>
+                    </div>
+                `;
+            };
+
+            document.getElementById('summary-top-companies').innerHTML = top5.map((c, i) => renderRow(c, i, true)).join('');
+            document.getElementById('summary-bottom-companies').innerHTML = bottom5.map((c, i) => renderRow(c, i, false)).join('');
+        }
+
+        function renderIndustryBars(companies) {
+            const industryMap = {};
+            companies.forEach(c => {
+                const ind = c.industry || 'Other';
+                if (!industryMap[ind]) industryMap[ind] = [];
+                industryMap[ind].push(c.average_compliance || 0);
+            });
+            const industries = Object.entries(industryMap)
+                .map(([name, vals]) => ({ name, avg: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length), count: vals.length }))
+                .sort((a, b) => b.avg - a.avg);
+
+            const palette = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6', '#84cc16'];
+            document.getElementById('summary-industry-bars').innerHTML = industries.map((ind, i) => {
+                const barColor = palette[i % palette.length];
+                return `
+                    <div style="margin-bottom: 0.85rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-size: 0.85rem; font-weight: 500; color: #374151;">${ind.name} <span style="color: #9ca3af; font-weight: 400;">(${ind.count})</span></span>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: ${ind.avg >= 80 ? '#059669' : ind.avg >= 60 ? '#d97706' : '#dc2626'};">${ind.avg}%</span>
+                        </div>
+                        <div style="height: 12px; background: #f3f4f6; border-radius: 6px; overflow: hidden;">
+                            <div style="height: 100%; width: ${ind.avg}%; background: ${barColor}; border-radius: 6px; transition: width 0.6s ease;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDocPipeline(reports) {
+            const statusCounts = {};
+            reports.forEach(r => {
+                const s = r.status || 'unknown';
+                statusCounts[s] = (statusCounts[s] || 0) + 1;
+            });
+            const labels = Object.keys(statusCounts);
+            const data = Object.values(statusCounts);
+            const colorMap = { approved: '#10b981', submitted: '#3b82f6', rejected: '#ef4444', reviewed: '#8b5cf6', draft: '#9ca3af' };
+            const bgColors = labels.map(l => colorMap[l] || '#6b7280');
+
+            const ctx = document.getElementById('summaryDocChart');
+            if (ctx && typeof Chart !== 'undefined') {
+                if (charts.summaryDoc) charts.summaryDoc.destroy();
+                charts.summaryDoc = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                        datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '55%',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+            // Legend
+            document.getElementById('summary-doc-legend').innerHTML = labels.map((l, i) => `
+                <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${bgColors[i]};margin-right:4px;"></span>${l.charAt(0).toUpperCase() + l.slice(1)} (${data[i]})</span>
+            `).join('');
+        }
+
+        function renderRecommendations(companies, reports, overallScore, lowCount) {
+            const recs = [];
+            if (lowCount > 0) {
+                recs.push({ icon: '🔴', priority: 'High', text: `${lowCount} compan${lowCount === 1 ? 'y' : 'ies'} scored below 70%. Prioritize compliance gap analysis and remediation for these entities.`, bg: '#fee2e2' });
+            }
+            if (overallScore < 80) {
+                recs.push({ icon: '🟡', priority: 'Medium', text: `Overall compliance score is ${overallScore}%. Target ≥80% by reviewing framework-specific control gaps across all companies.`, bg: '#fef3c7' });
+            }
+            const pending = reports.filter(r => r.status === 'submitted').length;
+            if (pending > 0) {
+                recs.push({ icon: '📝', priority: 'Action', text: `${pending} document${pending === 1 ? '' : 's'} pending review. Complete reviews to update compliance scoring.`, bg: '#dbeafe' });
+            }
+            const noReports = companies.filter(c => (c.report_count || 0) === 0).length;
+            if (noReports > 0) {
+                recs.push({ icon: '📂', priority: 'Info', text: `${noReports} compan${noReports === 1 ? 'y has' : 'ies have'} no annual reports attached. Scrape or upload reports to enable compliance analysis.`, bg: '#f3f4f6' });
+            }
+            if (overallScore >= 80) {
+                recs.push({ icon: '✅', priority: 'Good', text: `Overall compliance score of ${overallScore}% meets the target threshold. Continue monitoring to maintain this level.`, bg: '#d1fae5' });
+            }
+            recs.push({ icon: '🔒', priority: 'Best Practice', text: 'Ensure all production secrets (SECRET_KEY, JWT_SECRET_KEY) are set via environment variables and HTTPS is enforced.', bg: '#ede9fe' });
+
+            document.getElementById('summary-recommendations').innerHTML = recs.map(r => `
+                <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; background: ${r.bg};">
+                    <span style="font-size: 1.25rem; flex-shrink: 0;">${r.icon}</span>
+                    <div>
+                        <span style="font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #374151;">${r.priority}</span>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.88rem; color: #4b5563; line-height: 1.4;">${r.text}</p>
+                    </div>
                 </div>
             `).join('');
         }

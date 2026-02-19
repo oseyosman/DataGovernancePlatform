@@ -52,7 +52,7 @@ def get_companies():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve companies.'}), 500
 
 
 @bp.route('/<int:company_id>', methods=['GET'])
@@ -67,7 +67,7 @@ def get_company(company_id):
         return jsonify(company.to_dict(include_reports=True)), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve company.'}), 500
 
 
 @bp.route('/<int:company_id>/reports', methods=['GET'])
@@ -90,7 +90,7 @@ def get_company_reports(company_id):
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve company reports.'}), 500
 
 
 @bp.route('/scrape', methods=['POST'])
@@ -189,7 +189,7 @@ def scrape_company():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to scrape company data.'}), 500
 
 
 @bp.route('/search', methods=['GET'])
@@ -211,7 +211,7 @@ def search_companies_online():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to search companies.'}), 500
 
 
 @bp.route('/<int:company_id>', methods=['DELETE'])
@@ -236,7 +236,7 @@ def delete_company(company_id):
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to delete company.'}), 500
 
 
 @bp.route('/<int:company_id>/compliance', methods=['GET'])
@@ -297,7 +297,7 @@ def get_company_compliance(company_id):
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve compliance data.'}), 500
 
 
 @bp.route('/compliance-overview', methods=['GET'])
@@ -350,7 +350,7 @@ def get_all_companies_compliance():
             # Calculate average compliance score
             all_scores = []
             all_scores.extend(scores['iso27001'].values())
-            all_scores.extend(scores['iso27017'].values())
+            all_scores.extend(scores['nist_csf'].values())
             all_scores.extend(scores['soc2'].values())
             
             average_score = int(sum(all_scores) / len(all_scores))
@@ -376,4 +376,4 @@ def get_all_companies_compliance():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve compliance overview.'}), 500

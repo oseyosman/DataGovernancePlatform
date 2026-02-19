@@ -4,6 +4,7 @@ Author: Osman Yildiz
 Walsh College - MSIT Capstone Project
 """
 import os
+import secrets
 from datetime import timedelta
 from dotenv import load_dotenv
 
@@ -12,21 +13,25 @@ load_dotenv()
 class Config:
     """Base configuration"""
     
-    # Flask settings
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    # Flask settings — use env var or generate a random key (never hardcoded)
+    SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
     
     # Database settings
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
     'sqlite:///data_governance.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # JWT settings
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-change-in-production'
+    # JWT settings — use env var or generate a random key (never hardcoded)
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or secrets.token_hex(32)
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
     # CORS settings
     CORS_HEADERS = 'Content-Type'
+    
+    # File upload settings
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max upload size
+    ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'xlsx', 'csv', 'txt'}
 
 
 class DevelopmentConfig(Config):

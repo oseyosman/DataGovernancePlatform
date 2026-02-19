@@ -34,7 +34,7 @@ def get_all_users():
             'total': len(users)
         }), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve users.'}), 500
 
 
 @bp.route('/users/<int:user_id>', methods=['GET'])
@@ -47,7 +47,7 @@ def get_user(user_id):
             return jsonify({'error': 'User not found'}), 404
         return jsonify(user.to_dict()), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve user.'}), 500
 
 
 @bp.route('/users', methods=['POST'])
@@ -88,7 +88,7 @@ def create_user():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to create user.'}), 500
 
 
 @bp.route('/users/<int:user_id>', methods=['PUT'])
@@ -125,7 +125,7 @@ def update_user(user_id):
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to update user.'}), 500
 
 
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
@@ -149,7 +149,7 @@ def delete_user(user_id):
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to delete user.'}), 500
 
 
 @bp.route('/stats', methods=['GET'])
@@ -172,4 +172,4 @@ def get_admin_stats():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve admin statistics.'}), 500

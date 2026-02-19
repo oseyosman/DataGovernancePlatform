@@ -16,14 +16,14 @@ class ComplianceAnalyzer:
     
     # Industry baseline scores (based on real-world compliance data)
     INDUSTRY_BASELINES = {
-        'Technology': {'iso27001': 85, 'iso27017': 88, 'soc2': 90},
-        'Financial Services': {'iso27001': 92, 'iso27017': 85, 'soc2': 95},
-        'Healthcare': {'iso27001': 88, 'iso27017': 82, 'soc2': 93},
-        'Retail': {'iso27001': 75, 'iso27017': 78, 'soc2': 80},
-        'Manufacturing': {'iso27001': 72, 'iso27017': 70, 'soc2': 75},
-        'Energy': {'iso27001': 80, 'iso27017': 75, 'soc2': 82},
-        'Telecommunications': {'iso27001': 82, 'iso27017': 85, 'soc2': 85},
-        'default': {'iso27001': 75, 'iso27017': 75, 'soc2': 78}
+        'Technology': {'iso27001': 85, 'nist_csf': 87, 'soc2': 90},
+        'Financial Services': {'iso27001': 92, 'nist_csf': 90, 'soc2': 95},
+        'Healthcare': {'iso27001': 88, 'nist_csf': 84, 'soc2': 93},
+        'Retail': {'iso27001': 75, 'nist_csf': 72, 'soc2': 80},
+        'Manufacturing': {'iso27001': 72, 'nist_csf': 70, 'soc2': 75},
+        'Energy': {'iso27001': 80, 'nist_csf': 78, 'soc2': 82},
+        'Telecommunications': {'iso27001': 82, 'nist_csf': 83, 'soc2': 85},
+        'default': {'iso27001': 75, 'nist_csf': 73, 'soc2': 78}
     }
     
     # Company size factors (based on ticker presence, reports)
@@ -69,7 +69,7 @@ class ComplianceAnalyzer:
         # KEYWORD BOOSTING LOGIC
         # If we found explicit keywords in the reports, boost scores significantly
         iso27001_boost = 1.15 if compliance_keywords and compliance_keywords.get('ISO 27001') else 1.0
-        iso27017_boost = 1.15 if compliance_keywords and compliance_keywords.get('ISO 27017') else 1.0
+        nist_csf_boost = 1.15 if compliance_keywords and compliance_keywords.get('NIST CSF') else 1.0
         soc2_boost = 1.15 if compliance_keywords and compliance_keywords.get('SOC 2') else 1.0
         
         # ISO 27001 Controls (with company-specific variance)
@@ -82,14 +82,16 @@ class ComplianceAnalyzer:
             'operations_security': max(50, min(100, int((iso27001_base['operations_security'] + variance + 1) * iso27001_boost)))
         }
         
-        # ISO/IEC 27017 Cloud Controls (with variance)
-        iso27017_base = self._calculate_iso27017(
-            baseline['iso27017'], company_size, report_quality, maturity_level
+        # NIST Cybersecurity Framework (CSF) Functions (with variance)
+        nist_csf_base = self._calculate_nist_csf(
+            baseline['nist_csf'], company_size, report_quality, maturity_level, industry
         )
-        scores['iso27017'] = {
-            'cloud_access_control': max(50, min(100, int((iso27017_base['cloud_access_control'] + variance + 2) * iso27017_boost))),
-            'virtual_network_security': max(50, min(100, int((iso27017_base['virtual_network_security'] + variance) * iso27017_boost))),
-            'cloud_asset_management': max(50, min(100, int((iso27017_base['cloud_asset_management'] + variance - 2) * iso27017_boost)))
+        scores['nist_csf'] = {
+            'identify': max(50, min(100, int((nist_csf_base['identify'] + variance + 2) * nist_csf_boost))),
+            'protect': max(50, min(100, int((nist_csf_base['protect'] + variance) * nist_csf_boost))),
+            'detect': max(50, min(100, int((nist_csf_base['detect'] + variance - 1) * nist_csf_boost))),
+            'respond': max(50, min(100, int((nist_csf_base['respond'] + variance + 1) * nist_csf_boost))),
+            'recover': max(50, min(100, int((nist_csf_base['recover'] + variance - 2) * nist_csf_boost)))
         }
         
         # SOC 2 Trust Service Criteria (with variance)
@@ -240,18 +242,34 @@ class ComplianceAnalyzer:
         variance = (name_hash % 11) - 5
         return variance
     
-    def _calculate_iso27017(self, baseline, company_size, report_quality, maturity):
-        """Calculate ISO/IEC 27017 cloud control scores"""
+    def _calculate_nist_csf(self, baseline, company_size, report_quality, maturity, industry):
+        """Calculate NIST Cybersecurity Framework (CSF) function scores
+        
+        NIST CSF Core Functions:
+        - Identify: Asset management, risk assessment, governance
+        - Protect: Access control, data security, training
+        - Detect: Anomaly detection, continuous monitoring
+        - Respond: Response planning, communications, mitigation
+        - Recover: Recovery planning, improvements, communications
+        """
         multiplier = self.SIZE_MULTIPLIERS.get(company_size, 1.0)
         
-        cloud_access = int(baseline * multiplier * report_quality * 1.01)
-        virtual_network = int(baseline * multiplier * maturity * 0.99)
-        cloud_asset = int(baseline * multiplier * report_quality * 0.96)
+        # Industry-specific adjustments for NIST CSF
+        # Financial and Tech sectors tend to have stronger cyber frameworks
+        industry_boost = 1.05 if industry in ['Technology', 'Financial Services'] else 1.0
+        
+        identify = int(baseline * multiplier * report_quality * industry_boost * 1.02)
+        protect = int(baseline * multiplier * report_quality * industry_boost * 1.01)
+        detect = int(baseline * multiplier * maturity * 0.97)
+        respond = int(baseline * multiplier * maturity * industry_boost * 0.95)
+        recover = int(baseline * multiplier * report_quality * 0.93)
         
         return {
-            'cloud_access_control': min(cloud_access, 97),
-            'virtual_network_security': min(virtual_network, 95),
-            'cloud_asset_management': min(cloud_asset, 92)
+            'identify': min(identify, 98),
+            'protect': min(protect, 97),
+            'detect': min(detect, 95),
+            'respond': min(respond, 93),
+            'recover': min(recover, 91)
         }
     
     def _calculate_soc2(self, baseline, company_size, report_quality, maturity, industry):

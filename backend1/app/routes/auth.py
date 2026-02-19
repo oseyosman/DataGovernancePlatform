@@ -2,6 +2,7 @@
 Authentication Routes
 Author: Osman Yildiz
 """
+import re
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     create_access_token,
@@ -27,6 +28,19 @@ def register():
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
         
+        # Password strength validation
+        password = data['password']
+        if len(password) < 8:
+            return jsonify({'error': 'Password must be at least 8 characters long'}), 400
+        if not re.search(r'[A-Z]', password):
+            return jsonify({'error': 'Password must contain at least one uppercase letter'}), 400
+        if not re.search(r'[a-z]', password):
+            return jsonify({'error': 'Password must contain at least one lowercase letter'}), 400
+        if not re.search(r'[0-9]', password):
+            return jsonify({'error': 'Password must contain at least one digit'}), 400
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            return jsonify({'error': 'Password must contain at least one special character'}), 400
+        
         # Check if user already exists
         if User.query.filter_by(username=data['username']).first():
             return jsonify({'error': 'Username already exists'}), 400
@@ -34,13 +48,14 @@ def register():
         if User.query.filter_by(email=data['email']).first():
             return jsonify({'error': 'Email already exists'}), 400
         
-        # Create new user
+        # Create new user — role is always 'user' for public registration
+        # Only admins can assign elevated roles via /api/admin/users
         user = User(
             username=data['username'],
             email=data['email'],
             first_name=data['first_name'],
             last_name=data['last_name'],
-            role=data.get('role', 'user')  # Default to user role if not specified
+            role='user'
         )
         user.set_password(data['password'])
         
@@ -54,7 +69,7 @@ def register():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Registration failed. Please try again.'}), 500
 
 
 @bp.route('/login', methods=['POST'])
@@ -86,7 +101,7 @@ def login():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Login failed. Please try again.'}), 500
 
 
 @bp.route('/me', methods=['GET'])
@@ -103,7 +118,7 @@ def get_current_user():
         return jsonify(user.to_dict()), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve user information.'}), 500
 
 
 @bp.route('/refresh', methods=['POST'])
@@ -119,4 +134,4 @@ def refresh():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Token refresh failed.'}), 500

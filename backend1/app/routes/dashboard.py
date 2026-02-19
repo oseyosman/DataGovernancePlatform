@@ -49,10 +49,12 @@ def get_overview():
                     {'name': 'Information Security', 'score': 88, 'status': 'good'},
                     {'name': 'Operations Security', 'score': 75, 'status': 'warning'}
                 ],
-                'iso_27017': [
-                    {'name': 'Cloud Access Control', 'score': 90, 'status': 'good'},
-                    {'name': 'Virtual Network Security', 'score': 85, 'status': 'good'},
-                    {'name': 'Cloud Asset Management', 'score': 70, 'status': 'warning'}
+                'nist_csf': [
+                    {'name': 'Identify', 'score': 88, 'status': 'good'},
+                    {'name': 'Protect', 'score': 85, 'status': 'good'},
+                    {'name': 'Detect', 'score': 78, 'status': 'warning'},
+                    {'name': 'Respond', 'score': 82, 'status': 'good'},
+                    {'name': 'Recover', 'score': 72, 'status': 'warning'}
                 ],
                 'policies': [
                     {'name': 'Privacy Policy', 'completion': 95},
@@ -114,7 +116,7 @@ def get_overview():
         return jsonify(overview_data), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve dashboard overview.'}), 500
 
 
 @bp.route('/stats', methods=['GET'])
@@ -151,4 +153,4 @@ def get_stats():
         return jsonify(stats), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve dashboard statistics.'}), 500

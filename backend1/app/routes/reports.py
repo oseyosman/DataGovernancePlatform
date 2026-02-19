@@ -39,7 +39,7 @@ def get_reports():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve reports.'}), 500
 
 
 @bp.route('/<int:report_id>', methods=['GET'])
@@ -69,7 +69,14 @@ def get_report(report_id):
         return jsonify(report_data), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve report.'}), 500
+
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'xlsx', 'csv', 'txt'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @bp.route('/', methods=['POST'])
@@ -78,7 +85,6 @@ def create_report():
     """Create a new report"""
     try:
         user_id = int(get_jwt_identity())
-        # user_id = 1 # HARDCODED FOR DEBUGGING
         
         # Handle form data (multipart/form-data)
         if 'title' not in request.form or 'report_type' not in request.form:
@@ -95,7 +101,16 @@ def create_report():
         if 'file' in request.files:
             file = request.files['file']
             if file and file.filename != '':
+                # Validate file type
+                if not allowed_file(file.filename):
+                    return jsonify({'error': 'File type not allowed. Accepted: pdf, doc, docx, xlsx, csv, txt'}), 400
+                
                 filename = secure_filename(file.filename)
+                
+                # Reject if secure_filename returns empty (malicious filename)
+                if not filename:
+                    return jsonify({'error': 'Invalid filename'}), 400
+                
                 upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
                 os.makedirs(upload_folder, exist_ok=True)
                 
@@ -127,7 +142,7 @@ def create_report():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to create report.'}), 500
 
 
 @bp.route('/<int:report_id>', methods=['PUT'])
@@ -281,7 +296,7 @@ def review_report(report_id):
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to review report.'}), 500
 
 
 @bp.route('/<int:report_id>', methods=['DELETE'])
@@ -347,4 +362,4 @@ def get_report_stats():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve report statistics.'}), 500
