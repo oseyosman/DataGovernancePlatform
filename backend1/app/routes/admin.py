@@ -6,6 +6,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from backend1.app import db
 from backend1.app.models.user import User
+from backend1.app.models.activity import Activity
 
 bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
@@ -115,6 +116,9 @@ def update_user(user_id):
         
         if 'password' in data:
             user.set_password(data['password'])
+            
+        if 'is_active' in data:
+            user.is_active = data['is_active']
         
         db.session.commit()
         
@@ -150,6 +154,59 @@ def delete_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to delete user.'}), 500
+
+
+@bp.route('/users/<int:user_id>/status', methods=['PUT'])
+@admin_required
+def toggle_user_status(user_id):
+    """Toggle user active status (admin only)"""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Prevent deactivating yourself
+        current_user_id = get_jwt_identity()
+        if user_id == current_user_id:
+            return jsonify({'error': 'Cannot change your own status'}), 400
+            
+        data = request.get_json()
+        if 'is_active' in data:
+            user.is_active = data['is_active']
+        else:
+            user.is_active = not user.is_active
+            
+        db.session.commit()
+        
+        return jsonify({
+            'message': f"User {'activated' if user.is_active else 'deactivated'} successfully",
+            'is_active': user.is_active
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to change user status.'}), 500
+
+
+@bp.route('/activities', methods=['GET'])
+@admin_required
+def get_activities():
+    """Get all user activities (admin only)"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 50, type=int)
+        
+        activities = Activity.query.order_by(Activity.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return jsonify({
+            'activities': [a.to_dict() for a in activities.items],
+            'total': activities.total,
+            'pages': activities.pages,
+            'current_page': page
+        }), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to retrieve activities.'}), 500
 
 
 @bp.route('/stats', methods=['GET'])

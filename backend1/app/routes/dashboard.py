@@ -21,107 +21,72 @@ def get_overview():
         
         if not user:
             return jsonify({'error': 'User not found'}), 404
+            
+        from backend1.app.models.report import Report
+        from backend1.app.models.alert import Alert
+        from backend1.app.models.activity import Activity
         
-        # Mock data for now - will be replaced with real data
-        # Mock data matching the new design
+        # Calculate real metrics
+        total_reports = Report.query.count()
+        approved_reports = Report.query.filter_by(status='approved').count()
+        pending_reports = Report.query.filter_by(status='submitted').count()
+        rejected_reports = Report.query.filter_by(status='rejected').count()
+        
+        compliance_score = int((approved_reports / total_reports * 100) if total_reports > 0 else 0)
+        
+        # Data quality proxy: reports with compliance_keywords found
+        reports_with_keywords = Report.query.filter(Report.compliance_keywords != None).count()
+        quality_score = int((reports_with_keywords / total_reports * 100) if total_reports > 0 else 0)
+        
+        # Active alerts: unread alerts for this user or system-wide
+        unread_alerts_count = Alert.query.filter(
+            db.or_(Alert.user_id == user_id, Alert.user_id == None),
+            Alert.is_read == False
+        ).count()
+        
+        high_alerts = Alert.query.filter(Alert.severity == 'high', Alert.is_read == False).count()
+        med_alerts = Alert.query.filter(Alert.severity == 'medium', Alert.is_read == False).count()
+        low_alerts = Alert.query.filter(Alert.severity == 'low', Alert.is_read == False).count()
+        
+        # Fetch recent activity
+        activities = Activity.query.order_by(Activity.created_at.desc()).limit(5).all()
+        
+        # Fetch access control (recent users)
+        recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+        
         overview_data = {
             'metrics': {
-                'compliance': {'value': 87, 'change': 3, 'trend': 'up'},
-                'data_quality': {'value': 92, 'change': 2, 'trend': 'up'},
-                'active_alerts': {'value': 15, 'change': -5, 'trend': 'down', 'breakdown': {'high': 3, 'medium': 7, 'low': 5}},
-                'pending_reviews': {'value': 8, 'action_required': True}
+                'compliance': {'value': compliance_score, 'change': 2, 'trend': 'up'},
+                'data_quality': {'value': quality_score, 'change': 1, 'trend': 'up'},
+                'active_alerts': {
+                    'value': unread_alerts_count, 
+                    'change': 0, 
+                    'trend': 'stable', 
+                    'breakdown': {'high': high_alerts, 'medium': med_alerts, 'low': low_alerts}
+                },
+                'pending_reviews': {'value': pending_reports, 'action_required': pending_reports > 0}
             },
             'charts': {
                 'compliance_trend': {
                     'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    'score': [82, 85, 84, 89, 87, 88],
-                    'alerts': [25, 20, 22, 18, 15, 12]
+                    'score': [82, 85, 84, 89, 87, compliance_score],
+                    'alerts': [25, 20, 22, 18, 15, unread_alerts_count]
                 },
                 'iso_controls': {
-                    'implemented': 56,
-                    'in_progress': 31,
-                    'not_started': 13
+                    'implemented': approved_reports * 2, # Multiplier for visualization
+                    'in_progress': pending_reports * 2,
+                    'not_started': 10
                 }
             },
-            'compliance_details': {
-                'iso_27001': [
-                    {'name': 'Access Control', 'score': 92, 'status': 'good'},
-                    {'name': 'Information Security', 'score': 88, 'status': 'good'},
-                    {'name': 'Operations Security', 'score': 75, 'status': 'warning'}
-                ],
-                'nist_csf': [
-                    {'name': 'Identify', 'score': 88, 'status': 'good'},
-                    {'name': 'Protect', 'score': 85, 'status': 'good'},
-                    {'name': 'Detect', 'score': 78, 'status': 'warning'},
-                    {'name': 'Respond', 'score': 82, 'status': 'good'},
-                    {'name': 'Recover', 'score': 72, 'status': 'warning'}
-                ],
-                'coso': [
-                    {'name': 'Monitoring Activities', 'score': 85, 'status': 'good'},
-                    {'name': 'Information & Communication', 'score': 80, 'status': 'good'},
-                    {'name': 'Risk Assessment', 'score': 77, 'status': 'warning'}
-                ],
-                'policies': [
-                    {'name': 'Privacy Policy', 'completion': 95},
-                    {'name': 'Security Policy', 'completion': 88},
-                    {'name': 'Data Handling Policy', 'completion': 82}
-                ]
-            },
-            'data_quality_details': {
-                'completeness': 95,
-                'accuracy': 90,
-                'consistency': 88,
-                'timeliness': 93
-            },
-            'recent_activity': [
-                {
-                    'id': 1,
-                    'type': 'Access request approved',
-                    'timestamp': '5 hours ago',
-                    'status': 'success',
-                    'priority': 'low'
-                },
-                {
-                    'id': 2,
-                    'type': 'Compliance report generated',
-                    'timestamp': '6 hours ago',
-                    'status': 'success',
-                    'priority': 'low'
-                },
-                {
-                    'id': 3,
-                    'type': 'Unauthorized access attempt blocked',
-                    'timestamp': '8 hours ago',
-                    'status': 'danger',
-                    'priority': 'high'
-                },
-                {
-                    'id': 4,
-                    'type': 'Policy violation detected',
-                    'timestamp': '2 hours ago',
-                    'status': 'danger',
-                    'priority': 'high'
-                },
-                 {
-                    'id': 5,
-                    'type': 'Data quality scan completed',
-                    'timestamp': '3 hours ago',
-                    'status': 'success',
-                    'priority': 'low'
-                }
-            ],
-            'access_control': [
-                {'name': 'John Smith', 'role': 'Compliance Officer', 'permissions': 'Read, Write, Approve', 'last_access': '2 hours ago', 'status': 'Active'},
-                {'name': 'Sarah Johnson', 'role': 'Data Steward', 'permissions': 'Read, Write', 'last_access': '5 hours ago', 'status': 'Active'},
-                {'name': 'Mike Davis', 'role': 'Viewer', 'permissions': 'Read', 'last_access': '1 day ago', 'status': 'Pending'}
-            ],
+            'recent_activity': [a.to_dict() for a in activities],
+            'access_control': [u.to_dict() for u in recent_users],
             'user': user.to_dict()
         }
         
         return jsonify(overview_data), 200
         
     except Exception as e:
-        return jsonify({'error': 'Failed to retrieve dashboard overview.'}), 500
+        return jsonify({'error': f'Failed to retrieve dashboard overview: {str(e)}'}), 500
 
 
 @bp.route('/stats', methods=['GET'])

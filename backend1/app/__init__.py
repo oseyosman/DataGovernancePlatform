@@ -9,8 +9,20 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from backend1.config import Config
 
+from sqlalchemy import MetaData
+
+# Define naming convention for SQLite migrations
+convention = {
+    "ix": 'ix_%(column_0_label)s',
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
+
 # Initialize extensions
-db = SQLAlchemy()
+metadata = MetaData(naming_convention=convention)
+db = SQLAlchemy(metadata=metadata)
 migrate = Migrate()
 jwt = JWTManager()
 
@@ -24,7 +36,7 @@ def create_app(config_class=Config):
     
     # Initialize extensions with app
     db.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, render_as_batch=True)
     jwt.init_app(app)
     
     # Enable CORS — restrict to known development origins
@@ -63,13 +75,20 @@ def create_app(config_class=Config):
         return response
     
     # Register blueprints
-    from backend1.app.routes import auth_bp, dashboard_bp, admin_bp, reports_bp
+    from backend1.app.routes import auth_bp, dashboard_bp, admin_bp, reports_bp, alerts_bp
     from backend1.app.routes.companies import bp as companies_bp
+    
+    # Import models to ensure they are registered with SQLAlchemy
+    from backend1.app.models.user import User
+    from backend1.app.models.alert import Alert
+    from backend1.app.models.activity import Activity
+    
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(companies_bp)
+    app.register_blueprint(alerts_bp)
     
     # Health check route
     @app.route('/health')

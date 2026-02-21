@@ -7,11 +7,14 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from backend1.app import db
 from backend1.app.models.user import User
-from backend1.app.models.user import User
 from backend1.app.models.report import Report
+from backend1.app.models.activity import Activity
 import os
+import io
+import pandas as pd
+from fpdf import FPDF
+from flask import current_app, send_file
 from werkzeug.utils import secure_filename
-from flask import current_app
 
 bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 
@@ -392,3 +395,101 @@ def get_report_stats():
         
     except Exception as e:
         return jsonify({'error': 'Failed to retrieve report statistics.'}), 500
+
+
+@bp.route('/export/<fmt>', methods=['GET'])
+@jwt_required()
+def export_reports(fmt):
+    """Export reports to CSV, Excel, or PDF"""
+    try:
+        user_id = int(get_jwt_identity())
+        user = User.query.get(user_id)
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Get data based on role
+        if user.role == 'admin':
+            reports = Report.query.all()
+        else:
+            reports = Report.query.filter_by(created_by=user_id).all()
+            
+        data = [r.to_dict() for r in reports]
+        if not data:
+            return jsonify({'error': 'No data to export'}), 404
+            
+        df = pd.DataFrame(data)
+        
+        # Log activity
+        activity = Activity(
+            user_id=user_id,
+            action='export_reports',
+            description=f'Exported {len(reports)} reports to {fmt}'
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        if fmt == 'csv':
+            output = io.BytesIO()
+            df.to_csv(output, index=False)
+            output.seek(0)
+            return send_file(
+                output,
+                mimetype='text/csv',
+                as_attachment=True,
+                download_name=f'compliance_report_{datetime.now().strftime("%Y%m%d")}.csv'
+            )
+            
+        elif fmt == 'excel':
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name='Compliance Reports')
+            output.seek(0)
+            return send_file(
+                output,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                as_attachment=True,
+                download_name=f'compliance_report_{datetime.now().strftime("%Y%m%d")}.xlsx'
+            )
+            
+        elif fmt == 'pdf':
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", 'B', 16)
+            pdf.cell(0, 10, f"Compliance Reports - {datetime.now().strftime('%Y-%m-%d')}", ln=True, align='C')
+            pdf.ln(10)
+            
+            pdf.set_font("Arial", 'B', 10)
+            # Headers
+            headers = ['ID', 'Title', 'Type', 'Status', 'Creator']
+            col_width = pdf.epw / 5
+            for header in headers:
+                pdf.cell(col_width, 10, header, border=1)
+            pdf.ln()
+            
+            pdf.set_font("Arial", '', 9)
+            for r in reports:
+                # Add rows (truncating titles if too long)
+                title = (r.title[:25] + '..') if len(r.title) > 25 else r.title
+                pdf.cell(col_width, 10, str(r.id), border=1)
+                pdf.cell(col_width, 10, title, border=1)
+                pdf.cell(col_width, 10, r.report_type, border=1)
+                pdf.cell(col_width, 10, r.status, border=1)
+                pdf.cell(col_width, 10, str(r.created_by), border=1)
+                pdf.ln()
+                
+            pdf_output = pdf.output()
+            # output() in fpdf2 returns bytes by default if no dest is provided
+            return send_file(
+                io.BytesIO(pdf_output),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=f'compliance_report_{datetime.now().strftime("%Y%m%d")}.pdf'
+            )
+            
+        else:
+            return jsonify({'error': 'Invalid format'}), 400
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Export failed: {str(e)}'}), 500

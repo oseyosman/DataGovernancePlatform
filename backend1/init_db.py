@@ -11,7 +11,7 @@ app = create_app()
 
 with app.app_context():
     # Import models to register them
-    from backend1.app.models import user, report
+    from backend1.app.models import user, report, alert, activity
     
     # Create all tables
     db.create_all()

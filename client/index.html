@@ -91,6 +91,25 @@
                         style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; margin-right: 6px;"></span>
                     <span id="system-status">Checking...</span>
                 </button>
+                <div class="notification-container" style="position: relative; margin-right: 15px;">
+                    <button id="notification-bell" class="btn-icon" onclick="toggleNotifications()"
+                        style="background: none; border: none; font-size: 1.25rem; cursor: pointer; position: relative;">
+                        🔔<span id="notification-count" class="hidden"
+                            style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;">0</span>
+                    </button>
+                    <div id="notification-panel" class="card hidden"
+                        style="position: absolute; top: 40px; right: 0; width: 300px; z-index: 1000; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 0;">
+                        <div
+                            style="padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="margin: 0;">Notifications</h4>
+                            <button class="link-btn" onclick="markAllNotificationsRead()"
+                                style="font-size: 0.75rem;">Mark all read</button>
+                        </div>
+                        <div id="notification-list" style="max-height: 300px; overflow-y: auto; padding: 10px 0;">
+                            <div style="padding: 20px; text-align: center; color: #999;">No notifications</div>
+                        </div>
+                    </div>
+                </div>
                 <div id="user-display" style="font-weight: 500;"></div>
                 <button onclick="logout()" class="btn-primary" style="font-size: 0.875rem;">Logout</button>
             </div>
@@ -197,7 +216,15 @@
 
                 <!-- Recent Activity -->
                 <div class="card">
-                    <h3>Recent Activity</h3>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin-bottom: 0;">Recent Activity</h3>
+                        <div class="export-controls">
+                            <button class="btn-sm btn-white" onclick="exportData('pdf')">Export PDF</button>
+                            <button class="btn-sm btn-white" onclick="exportData('csv')">Export CSV</button>
+                            <button class="btn-sm btn-white" onclick="exportData('excel')">Excel</button>
+                        </div>
+                    </div>
                     <div class="activity-list" id="activity-feed">
                         <!-- Dynamic items -->
                     </div>
@@ -855,6 +882,8 @@
             document.getElementById('app-container').classList.remove('hidden');
             document.getElementById('user-display').textContent = user.username;
             fetchOverviewData(); // Load overview data on initial dashboard load
+            fetchNotifications(); // Initial notification fetch
+            startNotificationPolling(); // Start polling for new alerts
         }
 
         async function fetchDashboardData() {
@@ -2066,13 +2095,14 @@
 
                     // Transform user data to match the access control table format
                     const users = data.users.map(user => ({
+                        id: user.id,
                         name: user.first_name && user.last_name
                             ? `${user.first_name} ${user.last_name}`
                             : user.username,
                         role: user.role.charAt(0).toUpperCase() + user.role.slice(1),
                         permissions: getPermissionsForRole(user.role),
-                        last_access: formatLastAccess(user.created_at), // Using created_at as proxy
-                        status: 'Active' // All users active by default
+                        last_access: formatLastAccess(user.last_login || user.created_at),
+                        status: user.is_active ? 'Active' : 'Inactive'
                     }));
 
                     renderAccessTable(users);
@@ -2139,7 +2169,12 @@
                     <td>${user.last_access}</td>
                     <td><span class="status-${user.status.toLowerCase()}">${user.status}</span></td>
                     <td>
-                        <button class="btn-sm btn-white" onclick='handleUserAction(${JSON.stringify(user)})'>${user.status === 'Pending' ? 'Review' : 'View'}</button>
+                        <button class="btn-sm btn-white" onclick='handleUserAction(${JSON.stringify(user)})'>View</button>
+                        <button class="btn-sm ${user.status === 'Active' ? 'btn-danger' : 'btn-success'}" 
+                                onclick="toggleUserStatus(${user.id}, ${user.status === 'Active'})" 
+                                style="margin-left: 5px; color: ${user.status === 'Active' ? '#ef4444' : '#10b981'}; border-color: currentColor; background: none;">
+                            ${user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -2188,24 +2223,48 @@
                         <td>${user.last_access}</td>
                         <td><span class="status-${user.status.toLowerCase()}">${user.status}</span></td>
                         <td>
-                            <button class="btn-sm btn-white" onclick='handleUserAction(${JSON.stringify(user)})'>${user.status === 'Pending' ? 'Review' : 'View'}</button>
+                            <button class="btn-sm btn-white" onclick='handleUserAction(${JSON.stringify(user)})'>View</button>
+                            <button class="btn-sm ${user.status === 'Active' ? 'btn-danger' : 'btn-success'}" 
+                                    onclick="toggleUserStatus(${user.id}, ${user.status === 'Active'})" 
+                                    style="margin-left: 5px; color: ${user.status === 'Active' ? '#ef4444' : '#10b981'}; border-color: currentColor; background: none;">
+                                ${user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                            </button>
                         </td>
                     </tr>
                 `).join('');
             }
         }
 
+        async function toggleUserStatus(userId, currentIsActive) {
+            try {
+                const res = await fetch(`${API_URL}/admin/users/${userId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_active: !currentIsActive })
+                });
+
+                if (res.ok) {
+                    fetchUsers(); // Refresh table
+                } else {
+                    const data = await res.json();
+                    alert(`Action failed: ${data.error}`);
+                }
+            } catch (err) {
+                console.error('Error toggling user status:', err);
+            }
+        }
+
         function handleUserAction(user) {
-            const actionType = user.status === 'Pending' ? 'Review' : 'View';
             const modal = document.getElementById('user-modal');
             const modalTitle = document.getElementById('modal-title');
             const modalBody = document.getElementById('modal-body');
             const modalFooter = document.getElementById('modal-footer');
 
-            // Set modal title
-            modalTitle.textContent = `${actionType} User Details`;
+            modalTitle.textContent = `User Details: ${user.name}`;
 
-            // Build modal body with user details
             modalBody.innerHTML = `
                 <div class="modal-detail-row">
                     <div class="modal-detail-label">Name:</div>
@@ -2229,19 +2288,8 @@
                 </div>
             `;
 
-            // Build modal footer based on status
-            if (user.status === 'Pending') {
-                modalFooter.innerHTML = `
-                    <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button class="btn-confirm" onclick="approveUser('${user.name}')">Approve User</button>
-                `;
-            } else {
-                modalFooter.innerHTML = `
-                    <button class="btn-confirm" onclick="closeModal()">Close</button>
-                `;
-            }
+            modalFooter.innerHTML = `<button class="btn-confirm" onclick="closeModal()">Close</button>`;
 
-            // Show modal
             modal.classList.remove('hidden');
         }
 
@@ -2718,6 +2766,120 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        // --- NOTIFICATIONS & EXPORTS ---
+
+        let notificationTimer = null;
+
+        function toggleNotifications() {
+            const panel = document.getElementById('notification-panel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                fetchNotifications();
+            }
+        }
+
+        async function fetchNotifications() {
+            if (!token) return;
+            try {
+                const res = await fetch(`${API_URL}/alerts/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    renderNotifications(data.alerts);
+                    updateNotificationCount(data.unread_count);
+                }
+            } catch (err) {
+                console.error('Failed to fetch notifications:', err);
+            }
+        }
+
+        function updateNotificationCount(count) {
+            const el = document.getElementById('notification-count');
+            if (count > 0) {
+                el.textContent = count > 9 ? '9+' : count;
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function renderNotifications(alerts) {
+            const list = document.getElementById('notification-list');
+            if (!alerts || alerts.length === 0) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No notifications</div>';
+                return;
+            }
+
+            list.innerHTML = alerts.map(alert => `
+                <div onclick="handleNotificationClick(${alert.id})" style="padding: 12px 15px; border-bottom: 1px solid #f3f4f6; cursor: pointer; background: ${alert.is_read ? 'transparent' : '#f0f9ff'}; hover: background: #f9fafb;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span class="badge badge-${alert.severity}" style="font-size: 0.65rem;">${alert.alert_type.toUpperCase()}</span>
+                        <span style="font-size: 0.7rem; color: #9ca3af;">${formatLastAccess(alert.created_at)}</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #374151; ${alert.is_read ? '' : 'font-weight: 500;'}">${alert.message}</div>
+                </div>
+            `).join('');
+        }
+
+        async function handleNotificationClick(id) {
+            try {
+                await fetch(`${API_URL}/alerts/${id}/read`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                fetchNotifications();
+            } catch (err) {
+                console.error('Failed to mark notification read:', err);
+            }
+        }
+
+        async function markAllNotificationsRead() {
+            try {
+                await fetch(`${API_URL}/alerts/read-all`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                fetchNotifications();
+            } catch (err) {
+                console.error('Failed to mark all notifications read:', err);
+            }
+        }
+
+        function startNotificationPolling() {
+            if (notificationTimer) clearInterval(notificationTimer);
+            notificationTimer = setInterval(fetchNotifications, 30000); // Every 30 seconds
+        }
+
+        async function exportData(fmt) {
+            try {
+                const res = await fetch(`${API_URL}/reports/export/${fmt}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `compliance_export_${new Date().toISOString().slice(0, 10)}.${fmt === 'excel' ? 'xlsx' : fmt}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+
+                    // Add an activity log manually for the UI since the backend logged it in DB
+                    fetchOverviewData(); // Refresh activity feed
+                } else {
+                    const error = await res.json();
+                    alert(`Export failed: ${error.error || 'Unknown error'}`);
+                }
+            } catch (err) {
+                console.error('Export error:', err);
+                alert('Network error during export');
+            }
         }
     </script>
 </body>

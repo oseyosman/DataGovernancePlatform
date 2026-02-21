@@ -17,8 +17,9 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
     
     # Database settings
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-    'sqlite:///data_governance.db'
+    f"sqlite:///{os.path.join(BASE_DIR, 'data_governance.db')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # JWT settings — use env var or generate a random key (never hardcoded)
