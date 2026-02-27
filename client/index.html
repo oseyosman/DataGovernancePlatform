@@ -414,10 +414,12 @@
                         <input type="text" id="user-search" class="search-input" placeholder="Search users..."
                             oninput="filterAccessTable()">
                         <select id="role-filter" class="filter-select" onchange="filterAccessTable()">
-                            <option value="">All Users</option>
-                            <option value="Compliance Officer">Compliance Officers</option>
-                            <option value="Data Steward">Data Stewards</option>
-                            <option value="Viewer">Viewers</option>
+                            <option value="">All Roles</option>
+                            <option value="admin">Admins</option>
+                            <option value="compliance officer">Compliance Officers</option>
+                            <option value="data steward">Data Stewards</option>
+                            <option value="viewer">Viewers</option>
+                            <option value="user">Standard Users</option>
                         </select>
                         <select id="time-filter" class="filter-select" onchange="filterAccessTable()">
                             <option value="30">30 days</option>
@@ -2094,16 +2096,23 @@
                     const data = await res.json();
 
                     // Transform user data to match the access control table format
-                    const users = data.users.map(user => ({
-                        id: user.id,
-                        name: user.first_name && user.last_name
-                            ? `${user.first_name} ${user.last_name}`
-                            : user.username,
-                        role: user.role.charAt(0).toUpperCase() + user.role.slice(1),
-                        permissions: getPermissionsForRole(user.role),
-                        last_access: formatLastAccess(user.last_login || user.created_at),
-                        status: user.is_active ? 'Active' : 'Inactive'
-                    }));
+                    const users = data.users.map(user => {
+                        // Binary display mapping: Admin or User
+                        const isAdminRole = ['admin', 'compliance officer'].includes(user.role.toLowerCase());
+                        const displayRole = isAdminRole ? 'Admin' : 'User';
+
+                        return {
+                            id: user.id,
+                            name: user.first_name && user.last_name
+                                ? `${user.first_name} ${user.last_name}`
+                                : user.username,
+                            rawRole: user.role.toLowerCase(), // Store original role for filtering
+                            role: displayRole, // Table display role
+                            permissions: getPermissionsForRole(user.role),
+                            last_access: formatLastAccess(user.last_login || user.created_at),
+                            status: user.is_active ? 'Active' : 'Inactive'
+                        };
+                    });
 
                     renderAccessTable(users);
                 } else {
@@ -2132,12 +2141,13 @@
         }
 
         function getPermissionsForRole(role) {
-            const permissions = {
-                'admin': 'Full Access, User Management, Report Review',
-                'user': 'Read/Write, Document Upload',
-                'viewer': 'Read Only'
-            };
-            return permissions[role] || 'Standard Access';
+            const r = role.toLowerCase();
+            if (r === 'admin') return 'Full Access, User Management, Report Review';
+            if (r === 'compliance officer') return 'Compliance Review, Audit Access, Policies';
+            if (r === 'data steward') return 'Data Quality Management, Metadata, Lineage';
+            if (r === 'viewer') return 'Read Only, Dashboard Access';
+            if (r === 'user') return 'Read/Write, Document Upload';
+            return 'Standard Access';
         }
 
         function formatLastAccess(lastLogin) {
@@ -2187,14 +2197,15 @@
 
             // Filter users based on all criteria
             const filtered = allAccessUsers.filter(user => {
-                // Search filter (name, role, or permissions)
+                // Search filter (name, raw role, display role, or permissions)
                 const matchesSearch = !searchTerm ||
                     user.name.toLowerCase().includes(searchTerm) ||
+                    user.rawRole.includes(searchTerm) ||
                     user.role.toLowerCase().includes(searchTerm) ||
                     user.permissions.toLowerCase().includes(searchTerm);
 
-                // Role filter
-                const matchesRole = !roleFilter || user.role === roleFilter;
+                // Role filter (matches against the original raw role)
+                const matchesRole = !roleFilter || user.rawRole === roleFilter;
 
                 // Time filter (simplified - in real app would parse actual dates)
                 const matchesTime = true; // For demo, accept all times
