@@ -4,13 +4,13 @@
 
 ## Project Overview
 
-A web-based platform for managing data quality, access controls, and regulatory compliance with ISO 27001/27017 standards.
+A web-based platform for managing data quality, access controls, and regulatory compliance with ISO 27001/27017 standards. It includes automated data scraping from 10-K reports and a dashboard for compliance monitoring.
 
 ## Quick Start
 
 ### Prerequisites
 - Python 3.11+
-- PostgreSQL 15+
+- SQLite (Default) or PostgreSQL 15+
 - Git
 
 ### Installation
@@ -23,28 +23,28 @@ cd DataGovernancePlatform
 
 2. Set up backend:
 ```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate  # Windows
+cd backend1
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
 3. Configure environment:
-- Copy `.env.example` to `.env`
-- Update database credentials
+- Copy `.env.example` to `.env` (if available) or rely on defaults in `config.py`.
+- The application defaults to SQLite for easy setup.
 
-4. Create database:
+4. Initialize database:
 ```bash
-psql -U postgres
-CREATE DATABASE data_governance_db;
-\q
+flask db upgrade
 ```
 
-5. Initialize database:
+5. Seed initial data (Optional):
 ```bash
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
+python seed_companies.py
+python seed_alerts_and_activities.py
 ```
 
 6. Run application:
@@ -52,22 +52,27 @@ flask db upgrade
 python run.py
 ```
 
-Visit: http://localhost:5000/health
+Visit: http://localhost:5000/api/health
 
 ## Technology Stack
 
 - **Backend:** Python Flask 3.0
-- **Database:** PostgreSQL 15+
+- **Database:** SQLite (Dev), PostgreSQL (Prod)
 - **Authentication:** JWT (Flask-JWT-Extended)
-- **Frontend:** React 18+ (Coming in Phase 3)
+- **Frontend:** React 18+ (In Progress - see `client` directory)
 
 ## Project Status
 
-- ✅ Phase 1: Planning (Weeks 1-2)
-- 🔄 Phase 2: Backend Development (Weeks 3-5)
-- ⏳ Phase 3: Frontend Development (Weeks 6-8)
-- ⏳ Phase 4: Integration & Testing (Weeks 7-9)
-- ⏳ Phase 5: Documentation & Demo (Weeks 10-11)
+- ✅ Phase 1: Planning (Completed)
+- ✅ Phase 2: Backend Development (Core API, Scraper, Parser)
+- ✅ Phase 3: Frontend Development (React Dashboard in progress)
+- ✅ Phase 4: Integration & Full Testing (Completed)
+- ✅ Phase 5: Documentation & Demo Prep
+
+## Documentation
+
+- [QUICKSTART.md](QUICKSTART.md) - Detailed guide for scraping real data.
+- [SEEDING.md](SEEDING.md) - Instructions for populating the database.
 
 ## Contact
 
