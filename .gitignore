@@ -37,3 +37,11 @@ logs/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local script output / scratch files
+search_results.txt
+slugs_output.txt
+users_list.txt
+test_results.txt
+apple_scraped_data.json
+*_output.txt

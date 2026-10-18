@@ -4,9 +4,9 @@ Authentication tests
 Author: Osman Yildiz
 """
 import pytest
-from app import create_app, db
-from app.models.user import User
-from config import TestingConfig
+from backend1.app import create_app, db
+from backend1.app.models.user import User
+from backend1.config import TestingConfig
 
 @pytest.fixture
 def app():
@@ -36,7 +36,8 @@ def test_register_user(client):
         'username': 'testuser',
         'email': 'test@example.com',
         'password': 'Test123!',
-        'role': 'viewer'
+        'first_name': 'Test',
+        'last_name': 'User'
     })
     assert response.status_code == 201
     assert 'user' in response.json
@@ -48,7 +49,8 @@ def test_login_user(client):
         'username': 'testuser',
         'email': 'test@example.com',
         'password': 'Test123!',
-        'role': 'viewer'
+        'first_name': 'Test',
+        'last_name': 'User'
     })
     
     # Then login

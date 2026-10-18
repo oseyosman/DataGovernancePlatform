@@ -1,6 +1,9 @@
 """
-Intelligent Compliance Analysis Service
-Uses ML-based algorithms to calculate realistic compliance scores
+Compliance Scoring Service
+Heuristic scoring model: starts from per-industry baseline scores, adjusts for
+company size and report coverage, adds a small deterministic per-company offset,
+and boosts scores when framework keywords are found in scraped 10-K text.
+Scores are illustrative indicators, not an audit or certification result.
 Author: Osman Yildiz
 """
 import hashlib
@@ -10,11 +13,11 @@ from datetime import datetime
 
 class ComplianceAnalyzer:
     """
-    Analyzes company data to generate realistic compliance scores
-    Uses industry benchmarks and company characteristics
+    Generates heuristic compliance scores from industry baselines, company
+    characteristics, and keywords found in annual reports
     """
     
-    # Industry baseline scores (based on real-world compliance data)
+    # Industry baseline scores (assumed starting points, not measured data)
     INDUSTRY_BASELINES = {
         'Technology': {'iso27001': 85, 'nist_csf': 87, 'soc2': 90, 'coso': 82},
         'Financial Services': {'iso27001': 92, 'nist_csf': 90, 'soc2': 95, 'coso': 93},

@@ -1,8 +1,9 @@
 """
 Simple test script for the scraper - run from project root
 """
+import os
 import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, os.getcwd())
 
 from backend1.app.services.scraper import AnnualReportsScraper
 import json

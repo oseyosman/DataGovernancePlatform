@@ -139,7 +139,3 @@ Example report object:
   "report_type": "Annual Report"
 }
 ```
-
-## Next Steps
-
-See [walkthrough.md](file:///C:/Users/osman/.gemini/antigravity/brain/f75e5a4a-08e0-4e7d-8997-f48098df268e/walkthrough.md) for full implementation details and [implementation_plan.md](file:///C:/Users/osman/.gemini/antigravity/brain/f75e5a4a-08e0-4e7d-8997-f48098df268e/implementation_plan.md) for the complete plan.

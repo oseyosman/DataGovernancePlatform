@@ -5,8 +5,9 @@ Unified script - scrapes real company data with 3 most recent reports each
 Author: Data Governance Platform
 Usage: python seed_companies.py
 """
+import os
 import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, os.getcwd())
 
 from backend1.app import create_app, db
 from backend1.app.models.company import Company

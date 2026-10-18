@@ -34,9 +34,9 @@ def get_overview():
         
         compliance_score = int((approved_reports / total_reports * 100) if total_reports > 0 else 0)
         
-        # Data quality proxy: reports with compliance_keywords found
-        reports_with_keywords = Report.query.filter(Report.compliance_keywords != None).count()
-        quality_score = int((reports_with_keywords / total_reports * 100) if total_reports > 0 else 0)
+        # Data quality proxy: share of reports that have a compliance score recorded
+        scored_reports = Report.query.filter(Report.compliance_score != None).count()
+        quality_score = int((scored_reports / total_reports * 100) if total_reports > 0 else 0)
         
         # Active alerts: unread alerts for this user or system-wide
         unread_alerts_count = Alert.query.filter(

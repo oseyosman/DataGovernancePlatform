@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+
 from backend1.app.services.parser import parser
 
 # Test with a known PDF URL (e.g., Apple 10-K or similar if accessible, or just a dummy one)

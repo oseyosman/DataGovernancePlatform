@@ -5,24 +5,24 @@
 Populate the database with 20 companies from AnnualReports.com:
 
 ```bash
-python seed_companies.py
+python scripts/seed_companies.py
 ```
 
 List all companies in database:
 
 ```bash
-python seed_companies.py --list
+python scripts/seed_companies.py --list
 ```
 
 Specify a different target count:
 
 ```bash
-python seed_companies.py --count 25
+python scripts/seed_companies.py --count 25
 ```
 
 ## What It Does
 
-The `seed_companies.py` script:
+The `scripts/seed_companies.py` script:
 - Scrapes real company data from AnnualReports.com
 - Stores company information (name, website, industry, etc.)
 - Adds the 3 most recent annual reports for each company
