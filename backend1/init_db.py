@@ -11,9 +11,9 @@ app = create_app()
 
 with app.app_context():
     # Import models to register them
-    from backend1.app.models import user, report, alert, activity
+    from backend1.app.models import user, report, alert, activity, rag_chunk
     
     # Create all tables
     db.create_all()
     print("✅ Database tables created successfully!")
-    print("📊 Tables: users, reports")
+    print("📊 Tables: " + ", ".join(sorted(db.metadata.tables)))

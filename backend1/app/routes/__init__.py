@@ -6,5 +6,6 @@ from backend1.app.routes.dashboard import bp as dashboard_bp
 from backend1.app.routes.admin import bp as admin_bp
 from backend1.app.routes.reports import bp as reports_bp
 from backend1.app.routes.alerts import bp as alerts_bp
+from backend1.app.routes.rag import bp as rag_bp
 
-__all__ = ['auth_bp', 'dashboard_bp', 'admin_bp', 'reports_bp', 'alerts_bp']
+__all__ = ['auth_bp', 'dashboard_bp', 'admin_bp', 'reports_bp', 'alerts_bp', 'rag_bp']
