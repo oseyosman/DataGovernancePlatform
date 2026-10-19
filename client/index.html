@@ -739,7 +739,7 @@
         let allAccessUsers = [];
         let allCompaniesData = []; // Store all companies data for filtering/sorting
         let companiesReportCounts = {}; // Store report counts per company
-        const API_URL = window.location.origin.startsWith('http') ? `${window.location.origin}/api` : 'http://localhost:3201/api';
+        const API_URL = window.location.origin.startsWith('http') ? `${window.location.origin}/api` : 'http://localhost:5000/api';
         let token = localStorage.getItem('token');
         let charts = {};
         let healthCheckInterval = null;
@@ -749,7 +749,7 @@
             const dot = document.getElementById('system-dot');
             const label = document.getElementById('system-status');
             try {
-                const healthUrl = window.location.origin.startsWith('http') ? `${window.location.origin}/health` : 'http://localhost:3201/health';
+                const healthUrl = window.location.origin.startsWith('http') ? `${window.location.origin}/health` : 'http://localhost:5000/health';
                 const res = await fetch(healthUrl, { method: 'GET' });
                 if (res.ok) {
                     const data = await res.json();
