@@ -16,7 +16,7 @@ from backend1.app import create_app
 app = create_app()
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 3201))
     
     print("=" * 60)
     print("Data Governance & Compliance Platform")

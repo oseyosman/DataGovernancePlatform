@@ -45,8 +45,11 @@ def create_app(config_class=Config):
         "http://localhost:5000",
         "http://localhost:5500",
         "http://localhost:3000",
+        "http://localhost:3201",
         "http://localhost:8080",
         "http://127.0.0.1:5000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3201",
         "http://127.0.0.1:5500",
         "null",  # file:// protocol sends 'null' as origin
     ]
